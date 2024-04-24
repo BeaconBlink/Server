@@ -1,12 +1,20 @@
 const express = require('express');
 const {NetworkInfo, PagerPing, PagerTask, PagerAction, ServerResponse} = require("./defines.js");
 const app = express();
-const PORT = 3000;
+const PORT = 8080;
 
 app.use(express.json());
 
 app.post("/ping", (req, res) => {
-    console.log(req.body.pager_ping);
+    mac_address = req.body.mac_address;
+    scan_results = req.body.scan_results;
+
+    console.log("Ping received from: " + mac_address);
+    console.log("Scan results: ");
+    for (let i = 0; i < scan_results.length; i++) {
+        console.log(scan_results[i].ssid + " | " + scan_results[i].rssi + "dBm" + " | " + scan_results[i].bssid)
+    }
+
     res.send(new ServerResponse([new PagerTask(PagerAction.DO_WHATEVER, [])]));
 });
 
