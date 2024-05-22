@@ -10,7 +10,7 @@
 ## GET "/"
 This endpoint serves the main page for the client.
 
-## GET "/ping"
+## POST "/ping"
 This endpoint is used to send information to the server.
 
 ### Arguments:

@@ -1,4 +1,63 @@
-class NetworkInfo {
+//Server only defines
+
+export class DeviceInfo{
+    private mac_address: string;
+    private active: boolean;
+    private pending_massages: PagerTask[];
+    private inactive_counter: number;
+
+
+    constructor(mac_address: string) {
+        this.mac_address = mac_address;
+        this.active  = true;
+        this.pending_massages = [];
+        this.inactive_counter = 0;
+    }
+
+    getMacAddress(): string{
+        return this.mac_address;
+    }
+
+    setActive(flag: boolean): void{
+        this.active = flag;
+    }
+
+    getActive(): boolean{
+        return this.active;
+    }
+
+    getHasPendingMesseges(): boolean{
+        return this.pending_massages.length != 0;
+    }
+
+    resetCounter(): void{
+        this.inactive_counter = 0;
+    }
+
+    counterUp(): void{
+        this.inactive_counter += 1;
+    }
+
+    getCounter(): number{
+        return this.inactive_counter;
+    }
+
+    getPendingMesseges(): PagerTask[] {
+        return this.pending_massages;
+    }
+
+    addPendingMessege(task: PagerTask): void{
+        this.pending_massages.push(task);
+    }
+
+    clearPendingMesseges(): void{
+        this.pending_massages = [];
+    }
+}
+
+
+//Server and Pager side defines
+export class NetworkInfo {
     ssid: string;
     rssi: number;
     bssid: string;
@@ -10,7 +69,7 @@ class NetworkInfo {
     }
 }
 
-class PagerPing {
+export class PagerPing {
     mac_address: string;
     scan_results: NetworkInfo[];
 
@@ -20,11 +79,12 @@ class PagerPing {
     }
 }
 
-enum PagerAction {
-    DO_WHATEVER= "whatever"
+export enum PagerAction {
+    DO_WHATEVER= "whatever",
+    SUMMON = "summon"
 }
 
-class PagerTask {
+export class PagerTask {
     action: PagerAction;
     args: string[];
 
@@ -34,12 +94,10 @@ class PagerTask {
     }
 }
 
-class ServerResponse {
+export class ServerResponse {
     tasks: PagerTask[];
 
     constructor(tasks: PagerTask[]) {
         this.tasks = tasks;
     }
 }
-
-module.exports = { NetworkInfo, PagerPing, PagerTask, PagerAction, ServerResponse };
