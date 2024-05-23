@@ -2,12 +2,17 @@ FROM node:20
 
 WORKDIR /usr/app
 
-COPY package*.json .
+COPY *.json .
 
-RUN npm install
+RUN npm install && npm install typescript -g
 
 COPY *.js .
+COPY src/ src/
+COPY public/ public/
+COPY client/ client/
+
+RUN tsc
 
 EXPOSE 8080
 
-CMD ["node", "app.js"]
+CMD ["npm", "run", "start:dev"]
