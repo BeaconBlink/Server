@@ -38,6 +38,14 @@ function checkDeviceStatus(mac_address: string){
     }
 }
 
+app.get("/devices", (req: Request, res: Response, next: NextFunction): void => {
+    try {
+        res.send(saved_devices);
+    } catch (error) {
+        next(error);
+    }
+});
+
 app.post("/ping", (req: Request, res: Response, next: NextFunction): void => {
     try {
         let mac_address: string = req.body.mac_address;

@@ -1,7 +1,8 @@
 import React from "react";
+import DeviceList from "./DeviceList";
 
 const App: React.FC = () => {
-    return <h1>TypeScript is awesome</h1>;
+    return <DeviceList></DeviceList>;
 };
 
 export default App;

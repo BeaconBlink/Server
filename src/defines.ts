@@ -81,7 +81,8 @@ export class PagerPing {
 
 export enum PagerAction {
     DO_WHATEVER= "whatever",
-    SUMMON = "summon"
+    SUMMON = "summon",
+    DISPLAY = "display"
 }
 
 export class PagerTask {

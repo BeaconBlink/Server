@@ -1,0 +1,35 @@
+#device-list {
+    width: 80%;
+    margin: auto;
+    padding: 20px;
+}
+
+.title {
+    font-size: 2em;
+    text-align: center;
+    color: #333;
+}
+
+.device-item {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.mac-address {
+    font-weight: bold;
+}
+
+.active-status {
+    color: green;
+}
+
+.inactive {
+    opacity: 0.5;
+}
+
+.inactive-status {
+    color: red;
+}

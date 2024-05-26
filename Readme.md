@@ -1,8 +1,13 @@
 # Starting a server:
 
+In one terminal:
 ```bash
-"npm run build:dev" #in one terminal
-"npm run start:dev" #in another terminal
+npm run build:dev
+```
+
+In another terminal:
+```bash
+npm run start:dev
 ```
 
 # Endpoints:
