@@ -25,6 +25,7 @@ const DeviceList = () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             console.log("Message sent");
+            setMessage("");
         } catch (error) {
             console.error('Error sending message:', error);
         }
