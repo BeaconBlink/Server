@@ -38,6 +38,27 @@ function checkDeviceStatus(mac_address: string){
     }
 }
 
+app.post("/message", (req: Request, res: Response, next: NextFunction): void => {
+try {
+        let mac_address: string = req.body.mac_address;
+        let message: string = req.body.message;
+
+        let device = getDeviceInfo(mac_address);
+        device?.addPendingMessege(
+            new PagerTask(PagerAction.DISPLAY, [
+                message, //text
+                2, //line
+                65535, //text color
+                0 //bg color
+            ])
+        );
+        console.log("Messege added to queue");
+        res.send("Messege added to queue");
+    } catch (error) {
+        next(error);
+    }
+});
+
 app.get("/devices", (req: Request, res: Response, next: NextFunction): void => {
     try {
         res.send(saved_devices);
@@ -60,12 +81,16 @@ app.post("/ping", (req: Request, res: Response, next: NextFunction): void => {
         // }
         let device = getDeviceInfo(mac_address);
 
+        let pagerTasks: PagerTask[] = [];
+
         if(device?.getHasPendingMesseges()){
-            res.send(new ServerResponse(device?.getPendingMesseges()));
+            pagerTasks.push(device?.getLastPendingMessege());
         }
         else{
-            res.send(new ServerResponse([new PagerTask(PagerAction.DO_WHATEVER, [])]));
+            pagerTasks.push(new PagerTask(PagerAction.DO_WHATEVER, []));
         }
+
+        res.send(new ServerResponse(pagerTasks));
     } catch (error) {
         next(error);
     }

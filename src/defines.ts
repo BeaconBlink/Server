@@ -42,8 +42,8 @@ export class DeviceInfo{
         return this.inactive_counter;
     }
 
-    getPendingMesseges(): PagerTask[] {
-        return this.pending_massages;
+    getLastPendingMessege(): PagerTask {
+        return this.pending_massages.pop();
     }
 
     addPendingMessege(task: PagerTask): void{
@@ -87,9 +87,9 @@ export enum PagerAction {
 
 export class PagerTask {
     action: PagerAction;
-    args: string[];
+    args: (string|number)[];
 
-    constructor(action: PagerAction, args: string[]) {
+    constructor(action: PagerAction, args: (string | number)[]) {
         this.action = action;
         this.args = args;
     }
