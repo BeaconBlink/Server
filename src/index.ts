@@ -44,7 +44,7 @@ try {
         let message: string = req.body.message;
 
         let device = getDeviceInfo(mac_address);
-        device?.addPendingMessege(
+        device?.addPendingMessage(
             new PagerTask(PagerAction.DISPLAY, [
                 message, //text
                 2, //line
@@ -83,8 +83,8 @@ app.post("/ping", (req: Request, res: Response, next: NextFunction): void => {
 
         let pagerTasks: PagerTask[] = [];
 
-        if(device?.getHasPendingMesseges()){
-            pagerTasks.push(device?.getLastPendingMessege());
+        if(device?.getHasPendingMessages()){
+            pagerTasks.push(device?.getLastPendingMessage());
         }
         else{
             pagerTasks.push(new PagerTask(PagerAction.DO_WHATEVER, []));

@@ -26,7 +26,7 @@ export class DeviceInfo{
         return this.active;
     }
 
-    getHasPendingMesseges(): boolean{
+    getHasPendingMessages(): boolean{
         return this.pending_massages.length != 0;
     }
 
@@ -42,15 +42,15 @@ export class DeviceInfo{
         return this.inactive_counter;
     }
 
-    getLastPendingMessege(): PagerTask {
-        return this.pending_massages.pop();
+    getLastPendingMessage(): PagerTask {
+        return <PagerTask> this.pending_massages.pop();
     }
 
-    addPendingMessege(task: PagerTask): void{
+    addPendingMessage(task: PagerTask): void{
         this.pending_massages.push(task);
     }
 
-    clearPendingMesseges(): void{
+    clearPendingMessages(): void{
         this.pending_massages = [];
     }
 }
