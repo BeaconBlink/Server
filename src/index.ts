@@ -5,7 +5,7 @@ import {connect} from "./db";
 import {Db} from "mongodb";
 
 const app = express();
-const PORT = 8080;
+const PORT = 8082;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "../public")));
@@ -20,6 +20,8 @@ initDbConnection().then(() => {
     console.log("Connected to db");
 }).catch((error) => {
     console.error("Failed to connect to db:", error);
+    console.log("Retrying in 10 seconds...");
+    setTimeout(initDbConnection, 10000);
 });
 //Server will check every minute for state of all devices
 const TIMEOUT: number = 60* 1000; //60s
