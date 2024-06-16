@@ -12,6 +12,7 @@ const DeviceListElement : React.FC<DeviceListElementProps> = ({ index, device, s
     const [calibrationMode, setCalibrationMode] = useState(device.calibrationMode)
     const [room, setRoom] = useState("")
     const [calibratedRoom, setCalibratedRoom] = useState(device.calibratedRoom)
+    const [roomList, setRoomList] = useState<string[]>([])
 
     function isDeviceActive(device: DeviceInfo): boolean {
         return !(!device.active && device.inactive_counter >= 1);

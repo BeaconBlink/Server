@@ -125,14 +125,26 @@ app.post("/ping", (req: Request, res: Response, next: NextFunction): void => {
         checkDeviceStatus(mac_address);
 
         console.log("Ping received from: " + mac_address);
-        // console.log("Scan results: ");
-        // for (let i = 0; i < scan_results.length; i++) {
-        //     console.log(scan_results[i].ssid + " | " + scan_results[i].rssi + "dBm" + " | " + scan_results[i].bssid)
-        // }
         let device = getDeviceInfo(mac_address);
 
-        let pagerTasks: PagerTask[] = [];
+        console.log("Checking for [CAL]")
+        if(device?.getCalibrationMode()){
+            db.collection("rooms").findOne({ "name": device?.getCalibratedRoom() }).then((room) => {
+                if(room){
+                    console.log("Updating room: " + device?.getCalibratedRoom() + " with scan results");
+                    db.collection("rooms").updateOne(
+                        { "name": device?.getCalibratedRoom() },
+                        { $push: { "scan_results": { $each: scan_results } } } as any
+                    );
+                }
+                else{
+                    console.log("Creating new room: " + device?.getCalibratedRoom() + " with scan results");
+                    db.collection("rooms").insertOne({ "name": device?.getCalibratedRoom(), "scan_results": [scan_results] });
+                }
+            });
+        }
 
+        let pagerTasks: PagerTask[] = [];
         if(device?.getHasPendingMessages()){
             pagerTasks.push(device?.getFirstPendingMessage());
         }
