@@ -1,10 +1,12 @@
 //Server only defines
 
 export class DeviceInfo{
-    private mac_address: string;
-    private active: boolean;
-    private pending_massages: PagerTask[];
-    private inactive_counter: number;
+    public mac_address: string;
+    public active: boolean;
+    public pending_massages: PagerTask[];
+    public inactive_counter: number;
+    public calibrationMode: boolean;
+    public calibratedRoom: string;
 
 
     constructor(mac_address: string) {
@@ -12,6 +14,24 @@ export class DeviceInfo{
         this.active  = true;
         this.pending_massages = [];
         this.inactive_counter = 0;
+        this.calibrationMode = false;
+        this.calibratedRoom = "";
+    }
+
+    setCalibrationMode(flag: boolean): void{
+        this.calibrationMode = flag;
+    }
+
+    setCalibratedRoom(room: string): void{
+        this.calibratedRoom = room;
+    }
+
+    getCalibrationMode(): boolean{
+        return this.calibrationMode;
+    }
+
+    getCalibratedRoom(): string{
+        return this.calibratedRoom;
     }
 
     getMacAddress(): string{
@@ -44,6 +64,10 @@ export class DeviceInfo{
 
     getLastPendingMessage(): PagerTask {
         return <PagerTask> this.pending_massages.pop();
+    }
+
+    getFirstPendingMessage(): PagerTask {
+        return <PagerTask> this.pending_massages.shift()
     }
 
     addPendingMessage(task: PagerTask): void{

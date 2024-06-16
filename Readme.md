@@ -1,13 +1,24 @@
 # Starting a server:
 
+# Starting a server:
+
+### With docker
+Make sure to change `docker-compose.yml.example` to `docker-compose.yml`.
+<br>
+Then execute the command:
+```bash
+docker-compose up
+```
+
+### Without docker
 In one terminal:
 ```bash
-npm run build:dev
+npm run build
 ```
 
 In another terminal:
 ```bash
-npm run start:dev
+npm run start
 ```
 
 # Endpoints:

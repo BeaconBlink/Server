@@ -13,6 +13,7 @@ const TIMEOUT: number = 60* 1000; //60s
 const INACTIVE_LIMIT_TIMEOUT: number = 100;
 
 let saved_devices: DeviceInfo[] = [];
+let saved_rooms: string[] = [];
 
 app.get("/", (req: Request, res: Response, next: NextFunction): void => {
     try {
@@ -61,7 +62,40 @@ try {
 
 app.get("/devices", (req: Request, res: Response, next: NextFunction): void => {
     try {
+        if(saved_devices.length == 0){
+            saved_devices.push(new DeviceInfo("00:00:00:00:00:00"));
+        }
         res.send(saved_devices);
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.post("/calibration", (req: Request, res: Response, next: NextFunction): void => {
+    try {
+        let mac_address: string = req.body.mac_address;
+        let calibration_mode: boolean = req.body.calibration_mode;
+        let room: string = req.body.room;
+
+        if(!(room in saved_rooms)){
+            saved_rooms.push(room);
+        }
+
+        let device = getDeviceInfo(mac_address);
+        device?.setCalibrationMode(calibration_mode);
+        device?.setCalibratedRoom(room)
+        let message = calibration_mode ? "[CAL]: ON " + room : "[CAL]: OFF";
+        device?.addPendingMessage(
+            new PagerTask(PagerAction.DISPLAY, [
+                message, //text
+                2, //line
+                65535, //text color
+                0 //bg color
+            ])
+        );
+
+        console.log("Calibration mode set to: " + calibration_mode + " for device: " + mac_address + " in room: " + room);
+        res.send("Calibration mode set to: " + calibration_mode + " for device: " + mac_address + " in room: " + room);
     } catch (error) {
         next(error);
     }
@@ -84,7 +118,7 @@ app.post("/ping", (req: Request, res: Response, next: NextFunction): void => {
         let pagerTasks: PagerTask[] = [];
 
         if(device?.getHasPendingMessages()){
-            pagerTasks.push(device?.getLastPendingMessage());
+            pagerTasks.push(device?.getFirstPendingMessage());
         }
         else{
             pagerTasks.push(new PagerTask(PagerAction.DO_WHATEVER, []));
