@@ -1,12 +1,26 @@
 import express, { Request, Response, NextFunction } from "express";
 import path from "path";
 import { DeviceInfo, NetworkInfo, PagerPing, PagerAction, PagerTask, ServerResponse } from './defines';
+import {connect} from "./db";
+import {Db} from "mongodb";
+
 const app = express();
 const PORT = 8080;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "../public")));
 
+let db: Db;
+
+async function initDbConnection() {
+    db = await connect();
+}
+
+initDbConnection().then(() => {
+    console.log("Connected to db");
+}).catch((error) => {
+    console.error("Failed to connect to db:", error);
+});
 //Server will check every minute for state of all devices
 const TIMEOUT: number = 60* 1000; //60s
 // After how many timeouts device will be deleted from saved devices
