@@ -84,12 +84,12 @@ app.post("/calibration", (req: Request, res: Response, next: NextFunction): void
         let device = getDeviceInfo(mac_address);
         device?.setCalibrationMode(calibration_mode);
         device?.setCalibratedRoom(room)
-        let message = calibration_mode ? "[CAL]: ON " + room : "[CAL]: OFF";
+        let message = calibration_mode ? "Online [CAL]: " + room : "Online";
         device?.addPendingMessage(
             new PagerTask(PagerAction.DISPLAY, [
                 message, //text
-                2, //line
-                65535, //text color
+                0, //line
+                2016, //text color
                 0 //bg color
             ])
         );
