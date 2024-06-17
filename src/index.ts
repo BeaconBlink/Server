@@ -126,8 +126,7 @@ app.post("/ping", (req: Request, res: Response, next: NextFunction): void => {
 
         console.log("Ping received from: " + mac_address);
         let device = getDeviceInfo(mac_address);
-
-        console.log("Checking for [CAL]")
+        
         if(device?.getCalibrationMode()){
             db.collection("rooms").findOne({ "name": device?.getCalibratedRoom() }).then((room) => {
                 if(room){
