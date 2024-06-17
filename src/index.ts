@@ -133,7 +133,7 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
                     console.log("Updating room: " + device?.getCalibratedRoom() + " with scan results");
                     db.collection("rooms").updateOne(
                         { "name": device?.getCalibratedRoom() },
-                        { $push: { "scan_results": { $each: scan_results } } } as any
+                        { $push: { "scan_results": scan_results } } as any
                     );
                 }
                 else{
