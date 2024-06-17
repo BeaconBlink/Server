@@ -3,7 +3,6 @@ import path from "path";
 import { DeviceInfo, NetworkInfo, PagerPing, PagerAction, PagerTask, ServerResponse } from './defines';
 import {connect} from "./db";
 import {Db} from "mongodb";
-import axios from 'axios';
 
 const app = express();
 const PORT = 8080;
@@ -145,8 +144,18 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
         }
         else{
             try {
-                const response = await axios.post('python:/location', scan_results);
-                const locationName = response.data.name;
+                const response = await fetch('http://mapping:8083/location', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(scan_results)
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                const locationName = data.name;
                 device?.setLocation(locationName);
             } catch (error) {
                 console.error('Error fetching location:', error);
