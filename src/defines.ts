@@ -7,6 +7,7 @@ export class DeviceInfo{
     public inactive_counter: number;
     public calibrationMode: boolean;
     public calibratedRoom: string;
+    public location: string;
 
 
     constructor(mac_address: string) {
@@ -16,6 +17,15 @@ export class DeviceInfo{
         this.inactive_counter = 0;
         this.calibrationMode = false;
         this.calibratedRoom = "";
+        this.location = "";
+    }
+
+    getLocation(): string{
+        return this.location;
+    }
+
+    setLocation(name: string): void{
+        this.location = name;
     }
 
     setCalibrationMode(flag: boolean): void{

@@ -13,6 +13,8 @@ const DeviceListElement : React.FC<DeviceListElementProps> = ({ index, device, s
     const [room, setRoom] = useState("")
     const [calibratedRoom, setCalibratedRoom] = useState(device.calibratedRoom)
     const [roomList, setRoomList] = useState<string[]>([])
+    const [location, setLocation] = useState("")
+
 
     function isDeviceActive(device: DeviceInfo): boolean {
         return !(!device.active && device.inactive_counter >= 1);
@@ -42,6 +44,7 @@ const DeviceListElement : React.FC<DeviceListElementProps> = ({ index, device, s
     return(
         <div key={index} className={`device-item ${isDeviceActive(device) ? '' : 'inactive'}`}>
             <p className="mac-address">MAC Address: {device.mac_address}</p>
+            <p> Location: {device.location}</p>
             <p className={`active-status ${isDeviceActive(device) ? '' : 'inactive-status'}`}>
                 Active Status: {isDeviceActive(device) ? 'Active' : 'Inactive'}
             </p>

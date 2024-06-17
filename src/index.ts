@@ -3,6 +3,7 @@ import path from "path";
 import { DeviceInfo, NetworkInfo, PagerPing, PagerAction, PagerTask, ServerResponse } from './defines';
 import {connect} from "./db";
 import {Db} from "mongodb";
+import axios from 'axios';
 
 const app = express();
 const PORT = 8080;
@@ -117,7 +118,7 @@ app.post("/calibration", (req: Request, res: Response, next: NextFunction): void
     }
 });
 
-app.post("/ping", (req: Request, res: Response, next: NextFunction): void => {
+app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         let mac_address: string = req.body.mac_address;
         let scan_results: NetworkInfo[] = req.body.scan_results;
@@ -141,6 +142,15 @@ app.post("/ping", (req: Request, res: Response, next: NextFunction): void => {
                     db.collection("rooms").insertOne({ "name": device?.getCalibratedRoom(), "scan_results": [scan_results] });
                 }
             });
+        }
+        else{
+            try {
+                const response = await axios.post('python:/location', scan_results);
+                const locationName = response.data.name;
+                device?.setLocation(locationName);
+            } catch (error) {
+                console.error('Error fetching location:', error);
+            }
         }
 
         let pagerTasks: PagerTask[] = [];
