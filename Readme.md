@@ -35,3 +35,22 @@ This endpoint is used to send information to the server.
     - `ssid`: The SSID of the network.
     - `rssi`: The signal strength of the network in dBm.
     - `bssid`: The BSSID of the network.
+
+
+## POST "/message"
+This endpoint is used to send a message to the server, that saves message for a given device to be sent.
+
+### Arguments:
+- `mac_address`: The MAC address of the device.
+- `message`: The message to be sent.
+
+## GET "/devices":
+This endpoint returns a list of all devices that have communicated with the server.
+
+## POST "/calibration"
+This endpoint is used to manage the calibration of a device.
+
+### Arguments:
+- `mac_address`: The MAC address of the device.
+- `calibration`: The calibration value to be set (TRUE or FALSE)
+- `room`: The room in which the device is located.
