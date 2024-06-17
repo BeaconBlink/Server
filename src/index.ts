@@ -149,7 +149,7 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(scan_results)
+                    body: JSON.stringify({scan_results})
                 });
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
