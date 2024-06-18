@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {DeviceInfo} from "../src/defines";
 import DeviceListElement from "./DeviceListElement";
 
-const DATA_REFRESH_RATE = 30*1000;
+const DATA_REFRESH_RATE = 5*1000;
 
 const DeviceList = () => {
 
