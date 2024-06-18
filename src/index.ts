@@ -132,7 +132,7 @@ app.post("/location", async (req: Request, res: Response, next: NextFunction): P
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ flag }), // send flag in request body
+                body: JSON.stringify({mode: flag}), // send flag in request body
             });
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
