@@ -127,7 +127,7 @@ app.post("/location", async (req: Request, res: Response, next: NextFunction): P
             return;
         }
         try {
-            const response = await fetch('/location/mode', {
+            const response = await fetch('http://mapping:8083/location/mode', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
