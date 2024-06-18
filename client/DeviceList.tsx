@@ -8,6 +8,7 @@ const DeviceList = () => {
 
     const [devices, setDevices] = useState<DeviceInfo[]>([]);
     const [message, setMessage] = useState<string>("");
+    const [locationMode, setLocationMode] = useState(false);
 
     const sendMessage = async (mac_address: string) => {
         try {
@@ -25,6 +26,24 @@ const DeviceList = () => {
             setMessage("");
         } catch (error) {
             console.error('Error sending message:', error);
+        }
+    }
+
+    const handleLocationMode = async () => {
+        try {
+            const response = await fetch('/location', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ locationMode: !locationMode }), // toggle locationMode
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            setLocationMode(true); // update state
+        } catch (error) {
+            console.error('Error setting location mode:', error);
         }
     }
 
@@ -48,9 +67,13 @@ const DeviceList = () => {
     return (
         <div id="device-list">
             <h2 className="title">Device List</h2>
-            <input type="text" className="message-input" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Enter message" />
+            <input type="text" className="message-input" value={message} onChange={(e) => setMessage(e.target.value)}
+                   placeholder="Enter message"/>
+            <button onClick={handleLocationMode} disabled={locationMode}>
+                {locationMode ? 'Location Mode Enabled' : 'Enable Location Mode'}
+            </button>
             {devices.map((device, index) => (
-                <DeviceListElement index={index} device = {device} sendMessage={sendMessage}></DeviceListElement>
+                <DeviceListElement index={index} device={device} sendMessage={sendMessage}></DeviceListElement>
             ))}
         </div>
     );
