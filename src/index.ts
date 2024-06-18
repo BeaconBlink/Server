@@ -127,22 +127,22 @@ app.post("/location", async (req: Request, res: Response, next: NextFunction): P
             return;
         }
         try {
-            // const response = await fetch('/location/mode', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify({ flag }), // send flag in request body
-            // });
-            // if (!response.ok) {
-            //     throw new Error(`HTTP error! status: ${response.status}`);
-            // }
-            // const data = await response.json();
-            // if(data.trained){
+            const response = await fetch('/location/mode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ flag }), // send flag in request body
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            if(data.trained){
                 locationMode = true;
                 console.log("Location mode set to: " + flag);
                 res.send("Location mode set to: " + flag);
-            // }
+            }
         } catch (error) {
             console.error('Error setting location mode:', error);
         }
