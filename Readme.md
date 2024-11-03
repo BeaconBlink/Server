@@ -1,7 +1,5 @@
 # Starting a server:
 
-# Starting a server:
-
 ### With docker
 Make sure to change `docker-compose.yml.example` to `docker-compose.yml`.
 <br>
@@ -11,15 +9,31 @@ docker-compose up
 ```
 
 ### Without docker
-In one terminal:
+First build with npm:
 ```bash
 npm run build
 ```
 
-In another terminal:
+Then start the server:
 ```bash
 npm run start
 ```
+# Database schema:
+
+## Rooms:
+- `name` : The name of the room.
+- `calibration` : Whether the room is calibrated or not.
+- `last_calibration` : The last time the room was calibrated.
+- `tags` : The tags of the room.
+- `scan_results` : The scan results of the room.
+
+## Devices:
+- `mac_address` : The MAC address of the device.
+- `alias` : The alias of the device.
+- `last_connected` : The last time the device connected.
+- `room` : The room in which the device is located.
+- `calibration_mode` : The calibration status of the device.
+- `battery_level` : The battery level of the device.
 
 # Endpoints:
 
@@ -54,3 +68,9 @@ This endpoint is used to manage the calibration of a device.
 - `mac_address`: The MAC address of the device.
 - `calibration`: The calibration value to be set (TRUE or FALSE)
 - `room`: The room in which the device is located.
+
+## POST "/location"
+This endpoint is used to manage the location mode of the app.
+
+### Arguments:
+- `flag` : The location mode to be set (TRUE or FALSE)
