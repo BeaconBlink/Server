@@ -1,6 +1,38 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+* {
+    --main-color: #121212;
+    --complementary-color: #272533;
+    --accenct-color: #faf7ff;
+    --accenct-color2: #8685ef;
+
+}
+
+.main_color{
+    background-color: var(--main-color);
+    color: var(--main-color);
+}
+
+.complementary_color{
+    background-color: var(--complementary-color);
+    color: var(--complementary-color);
+}
+
+.accenct_color{
+    background-color: var(--accenct-color);
+    color: var(--accenct-color);
+}
+
+.accenct_color2 {
+    background-color: var(--accenct-color2);
+    color: var(--accenct-color2);
+}
+
+.main_theme{
+    background-color: var(--main-color);
+    color: var(--accenct-color);
+}
 
 #device-list {
     width: 80%;
