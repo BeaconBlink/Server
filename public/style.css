@@ -2,34 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 * {
-    --main-color: #121212;
-    --complementary-color: #272533;
-    --accenct-color: #faf7ff;
-    --accenct-color2: #8685ef;
+    --main-color: #1F2937;
+    --complementary-color: #4c5666;
+    --accenct-color: #dbf2ff;
+    --accenct-color2: #dea01e;
 
 }
 
-.main_color{
+.main-color{
     background-color: var(--main-color);
     color: var(--main-color);
 }
 
-.complementary_color{
+.text-main-color {
+    color: var(--main-color);
+}
+
+.bg-main-color {
+    background-color: var(--main-color);
+}
+
+.complementary-color{
     background-color: var(--complementary-color);
     color: var(--complementary-color);
 }
 
-.accenct_color{
+.text-complementary-color {
+    color: var(--complementary-color);
+}
+
+.bg-complementary-color {
+    background-color: var(--complementary-color);
+}
+
+.accenct-color{
     background-color: var(--accenct-color);
     color: var(--accenct-color);
 }
 
-.accenct_color2 {
+.text-accenct-color {
+    color: var(--accenct-color);
+}
+
+.bg-accenct-color {
+    background-color: var(--accenct-color);
+}
+
+.accenct-color2 {
     background-color: var(--accenct-color2);
     color: var(--accenct-color2);
 }
 
-.main_theme{
+.text-accenct-color2 {
+    color: var(--accenct-color2);
+}
+
+.bg-accenct-color2 {
+    background-color: var(--accenct-color2);
+}
+
+.main-theme{
     background-color: var(--main-color);
     color: var(--accenct-color);
 }
@@ -43,15 +75,8 @@
     align-items: center;
 }
 
-.title {
-    font-size: 2em;
-    text-align: center;
-    color: #333;
-}
-
 .device-item {
     width: 100%;
-    background-color: #f9f9f9;
     border: 1px solid #ddd;
     margin-bottom: 10px;
     padding: 10px;

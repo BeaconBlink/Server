@@ -1,23 +1,24 @@
 import React, {useState} from "react";
 import {DeviceInfo} from "../../src/defines";
+import Device from "../../src/model/device";
 
 interface DeviceListElementProps {
     index: number;
-    device: DeviceInfo;
+    device: Device;
     sendMessage: (value: string) => void;
 }
 
 const DeviceListElement : React.FC<DeviceListElementProps> = ({ index, device, sendMessage }) => {
 
-    const [calibrationMode, setCalibrationMode] = useState(device.calibrationMode)
+    const [calibrationMode, setCalibrationMode] = useState(device.calibration_mode)
     const [room, setRoom] = useState("")
-    const [calibratedRoom, setCalibratedRoom] = useState(device.calibratedRoom)
+    const [calibratedRoom, setCalibratedRoom] = useState(device.calibrated_room)
     const [roomList, setRoomList] = useState<string[]>([])
     const [location, setLocation] = useState("")
 
 
-    function isDeviceActive(device: DeviceInfo): boolean {
-        return !(!device.active && device.inactive_counter >= 1);
+    function isDeviceActive(device: Device): boolean {
+        return true;
     }
 
     const calibrationModeChanged = async (mac_address: string, calibration_mode: boolean, room: string) => {

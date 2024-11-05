@@ -6,7 +6,7 @@ import { SiIbeacon } from "react-icons/si";
 const Menu: React.FC = () => {
     return (
         <div>
-        <div className="flex items-center justify-between p-4 bg-gray-800 text-white">
+        <div className="flex items-center justify-between p-4 main-theme">
             <div className="hidden md:block">
                 <Link to="/" className="flex items-center space-x-2">
                     <SiIbeacon className="text-3xl" />

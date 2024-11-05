@@ -1,13 +1,20 @@
 //Server only defines
-
 export class DeviceInfo{
+    //Do Bazy
     public mac_address: string;
-    public active: boolean;
-    public pending_massages: PagerTask[];
-    public inactive_counter: number;
     public calibrationMode: boolean;
-    public calibratedRoom: string;
+
     public location: string;
+
+    //Lokalnie
+    public pending_massages: PagerTask[];
+    public calibratedRoom: string;
+    //stan baterii
+
+    //Do wyjebania
+    public active: boolean;
+    public inactive_counter: number;
+
 
 
     constructor(mac_address: string) {

@@ -1,8 +1,9 @@
 import express, { Request, Response, NextFunction } from "express";
 import path from "path";
-import { DeviceInfo, NetworkInfo, PagerPing, PagerAction, PagerTask, ServerResponse } from './defines';
-import {connect} from "./db";
-import {Db} from "mongodb";
+import {DeviceInfo, NetworkInfo, PagerPing, PagerAction, PagerTask, ServerResponse } from './defines';
+import {collections, connect} from "./services/database.service";
+import {devicesRouter} from "./routes/devices.router";
+import Device from "./model/device";
 
 const app = express();
 const PORT = 8080;
@@ -10,10 +11,8 @@ const PORT = 8080;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "../public")));
 
-let db: Db;
-
 async function initDbConnection() {
-    db = await connect();
+    await connect();
 }
 
 initDbConnection().then(() => {
@@ -23,11 +22,7 @@ initDbConnection().then(() => {
     console.log("Retrying in 10 seconds...");
     setTimeout(initDbConnection, 10000);
 });
-//Server will check every minute for state of all devices
-const TIMEOUT: number = 60* 1000; //60s
-// After how many timeouts device will be deleted from saved devices
-const INACTIVE_LIMIT_TIMEOUT: number = 100;
-
+app.use("/devices", devicesRouter);
 let saved_devices: DeviceInfo[] = [];
 let saved_rooms: string[] = [];
 
@@ -43,18 +38,6 @@ app.get("/", (req: Request, res: Response, next: NextFunction): void => {
 
 function getDeviceInfo(mac_address: string){
     return saved_devices.find(device => device.getMacAddress() == mac_address);
-}
-
-function checkDeviceStatus(mac_address: string){
-    let found_device = getDeviceInfo(mac_address);
-    if(found_device === undefined){
-      saved_devices.push(new DeviceInfo(mac_address))
-    }
-    else{
-        let i = saved_devices.indexOf(found_device);
-        saved_devices[i].setActive(true);
-        saved_devices[i].resetCounter();
-    }
 }
 
 app.post("/message", (req: Request, res: Response, next: NextFunction): void => {
@@ -73,17 +56,6 @@ try {
         );
         console.log("Messege added to queue");
         res.send("Messege added to queue");
-    } catch (error) {
-        next(error);
-    }
-});
-
-app.get("/devices", (req: Request, res: Response, next: NextFunction): void => {
-    try {
-        if(saved_devices.length == 0){
-            saved_devices.push(new DeviceInfo("00:00:00:00:00:00"));
-        }
-        res.send(saved_devices);
     } catch (error) {
         next(error);
     }
@@ -156,23 +128,46 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
         let mac_address: string = req.body.mac_address;
         let scan_results: NetworkInfo[] = req.body.scan_results;
 
-        checkDeviceStatus(mac_address);
+            // Create a new Device object
+            const newDevice = new Device(mac_address, "", new Date(), "", false, "", 100, []);
+
+            try {
+                const response = await fetch('http://localhost:8080/devices/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newDevice),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                console.log(`Successfully created a new device with mac_address ${mac_address}`);
+            } catch (error) {
+                console.error('Error creating new device:', error);
+            }
 
         console.log("Ping received from: " + mac_address);
         let device = getDeviceInfo(mac_address);
 
         if(device?.getCalibrationMode()){
-            db.collection("rooms").findOne({ "name": device?.getCalibratedRoom() }).then((room) => {
+
+            // @ts-ignore
+            collections.rooms.findOne({ "name": device?.getCalibratedRoom() }).then((room) => {
                 if(room){
                     console.log("Updating room: " + device?.getCalibratedRoom() + " with scan results");
-                    db.collection("rooms").updateOne(
+                    // @ts-ignore
+                    collections.rooms.updateOne(
                         { "name": device?.getCalibratedRoom() },
                         { $push: { "scan_results": scan_results } } as any
                     );
                 }
                 else{
                     console.log("Creating new room: " + device?.getCalibratedRoom() + " with scan results");
-                    db.collection("rooms").insertOne({ "name": device?.getCalibratedRoom(), "scan_results": [scan_results] });
+                    // @ts-ignore
+                    collections.rooms.insertOne({ "name": device?.getCalibratedRoom(), "scan_results": [scan_results] });
                 }
             });
         }
@@ -210,27 +205,7 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
     }
 })
 
-function checkInactiveDevices() {
-    console.log("checking all devices")
-    for (let i = 0; i < saved_devices.length; i++) {
-        if (saved_devices[i].getActive()) {
-            saved_devices[i].setActive(false);
-            console.log("inactivate: " + saved_devices[i].getMacAddress())
-        }
-        else if(saved_devices[i].getCounter() < INACTIVE_LIMIT_TIMEOUT){
-            saved_devices[i].counterUp();
-            console.log("inactive counter for " + saved_devices[i].getMacAddress() + " is " + saved_devices[i].getCounter())
-        }
-        else{
-            saved_devices.splice(i, 1);
-            console.log("deleting: " + saved_devices[i].getMacAddress())
-        }
-    }
-}
-
 app.listen(PORT, () => {
     console.log(`App listening on port ${PORT}`)
-
-    setInterval(checkInactiveDevices, 60 * 1000); // Run every minute
 })
 

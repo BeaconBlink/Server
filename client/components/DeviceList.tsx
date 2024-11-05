@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {DeviceInfo} from "../../src/defines";
 import DeviceListElement from "./DeviceListElement";
+import Device from "../../src/model/device";
 
 const DATA_REFRESH_RATE = 5*1000;
 
 const DeviceList = () => {
 
-    const [devices, setDevices] = useState<DeviceInfo[]>([]);
+    const [devices, setDevices] = useState<Device[]>([]);
     const [message, setMessage] = useState<string>("");
     const [locationMode, setLocationMode] = useState(false);
 
@@ -65,8 +65,7 @@ const DeviceList = () => {
     }, []);
 
     return (
-        <div id="device-list main_theme">
-            <h2 className="title">Device List</h2>
+        <div id="device-list">
             <input type="text" className="message-input" value={message} onChange={(e) => setMessage(e.target.value)}
                    placeholder="Enter message"/>
             <button onClick={handleLocationMode} disabled={locationMode}>
