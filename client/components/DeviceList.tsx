@@ -7,45 +7,6 @@ const DATA_REFRESH_RATE = 5*1000;
 const DeviceList = () => {
 
     const [devices, setDevices] = useState<Device[]>([]);
-    const [message, setMessage] = useState<string>("");
-    const [locationMode, setLocationMode] = useState(false);
-
-    const sendMessage = async (mac_address: string) => {
-        try {
-            const response = await fetch('/message', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ mac_address, message }),
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            console.log("Message sent");
-            setMessage("");
-        } catch (error) {
-            console.error('Error sending message:', error);
-        }
-    }
-
-    const handleLocationMode = async () => {
-        try {
-            const response = await fetch('/location', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ locationMode: !locationMode }), // toggle locationMode
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            setLocationMode(true); // update state
-        } catch (error) {
-            console.error('Error setting location mode:', error);
-        }
-    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -65,14 +26,9 @@ const DeviceList = () => {
     }, []);
 
     return (
-        <div id="device-list">
-            <input type="text" className="message-input" value={message} onChange={(e) => setMessage(e.target.value)}
-                   placeholder="Enter message"/>
-            <button onClick={handleLocationMode} disabled={locationMode}>
-                {locationMode ? 'Location Mode Enabled' : 'Enable Location Mode'}
-            </button>
+        <div className="flex flex-wrap justify-evenly items-start">
             {devices.map((device, index) => (
-                <DeviceListElement index={index} device={device} sendMessage={sendMessage}></DeviceListElement>
+                <DeviceListElement key={index} device={device} onSetAlias={() => console.log("")} onPingTest={() => console.log("")} onDelete={() => console.log("")} />
             ))}
         </div>
     );
