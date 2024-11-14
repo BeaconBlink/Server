@@ -12,8 +12,7 @@ devicesRouter.get("/", async (_req: Request, res: Response) => {
         const devices = (await collections.devices.find({}).toArray()) as unknown as Device[];
 
         res.status(200).send(devices);
-    } catch (error) {
-        // @ts-ignore
+    } catch (error : any) {
         res.status(500).send(error.message);
     }
 });
@@ -51,9 +50,48 @@ devicesRouter.post("/", async (req: Request, res: Response) => {
                 ? res.status(201).send(`Successfully created a new device with id ${result.insertedId}`)
                 : res.status(500).send("Failed to create a new device.");
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
+        res.status(400).send(error.message);
+    }
+});
+
+devicesRouter.put("/:mac_address", async (req: Request, res: Response) => {
+    const mac_address = req?.params?.mac_address;
+
+    try {
+        const updateDevice: Device = req.body as Device;
+        const query = { mac_address: mac_address };
+
         // @ts-ignore
+        const result = await collections.devices.updateOne(query, { $set: updateDevice });
+
+        result
+            ? res.status(200).send(`Successfully updated device with mac_address ${mac_address}`)
+            : res.status(304).send(`Device with mac_address: ${mac_address} not updated`);
+    } catch (error: any) {
+        console.error(error.message);
+        res.status(400).send(error.message);
+    }
+});
+
+devicesRouter.delete("/:mac_address", async (req: Request, res: Response) => {
+    const mac_address = req?.params?.mac_address;
+
+    try {
+        const query = { mac_address: mac_address };
+        // @ts-ignore
+        const result = await collections.devices.deleteOne(query);
+
+        if (result && result.deletedCount) {
+            res.status(202).send(`Successfully removed device with mac_address ${mac_address}`);
+        } else if (!result) {
+            res.status(400).send(`Failed to remove device with mac_address ${mac_address}`);
+        } else if (!result.deletedCount) {
+            res.status(404).send(`Device with mac_address ${mac_address} does not exist`);
+        }
+    } catch (error: any) {
+        console.error(error.message);
         res.status(400).send(error.message);
     }
 });

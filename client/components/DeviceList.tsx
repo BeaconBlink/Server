@@ -8,6 +8,10 @@ const DeviceList = () => {
 
     const [devices, setDevices] = useState<Device[]>([]);
 
+    const onDeleteDevice = (device: Device) => {
+        setDevices(devices.filter((d) => d.mac_address !== device.mac_address));
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             const response = await fetch('/devices');
@@ -25,10 +29,19 @@ const DeviceList = () => {
         return () => clearInterval(intervalId);
     }, []);
 
+    const isActive = (lastConnected: Date) => {
+        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+        return lastConnected >= tenMinutesAgo;
+    };
+
+    const sortedDevices = devices.sort((a, b) => {
+        return Number(isActive(new Date(b.last_connected))) - Number(isActive(new Date(a.last_connected)));
+    });
+
     return (
         <div className="flex flex-wrap justify-evenly items-start">
-            {devices.map((device, index) => (
-                <DeviceListElement key={index} device={device} onSetAlias={() => console.log("")} onPingTest={() => console.log("")} onDelete={() => console.log("")} />
+            {sortedDevices.map((device, index) => (
+                <DeviceListElement key={index} device={device} onDelete={onDeleteDevice} isActive={isActive(new Date(device.last_connected))}/>
             ))}
         </div>
     );

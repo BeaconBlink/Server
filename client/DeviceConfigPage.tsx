@@ -4,7 +4,7 @@ import { TbInfoSquareRounded } from "react-icons/tb";
 
 const DeviceConfigPage: React.FC = () => {
     return (
-        <div className="main-theme min-h-screen w-screen flex flex-col items-center">
+        <div className="main-theme min-h-screen w-screen flex pt-20 flex-col items-center">
             <div className="md:w-4/5 w-11/12 rounded-md">
                 <div className="w-full px-6 py-4 flex justify-between items-center">
                     <div className="flex items-end space-x-2">

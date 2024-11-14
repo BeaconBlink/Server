@@ -66,3 +66,6 @@
     color: var(--accenct-color);
 }
 
+body {
+    background-color: var(--main-color);
+}

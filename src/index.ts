@@ -1,6 +1,6 @@
-import express, { Request, Response, NextFunction } from "express";
+import express, {NextFunction, Request, Response} from "express";
 import path from "path";
-import {DeviceInfo, NetworkInfo, PagerPing, PagerAction, PagerTask, ServerResponse } from './defines';
+import {DeviceInfo, NetworkInfo, PagerAction, PagerTask, ServerResponse} from './defines';
 import {collections, connect} from "./services/database.service";
 import {devicesRouter} from "./routes/devices.router";
 import Device from "./model/device";
@@ -23,8 +23,6 @@ initDbConnection().then(() => {
     setTimeout(initDbConnection, 10000);
 });
 app.use("/devices", devicesRouter);
-let saved_devices: DeviceInfo[] = [];
-let saved_rooms: string[] = [];
 
 let locationMode: boolean = false;
 
@@ -36,56 +34,99 @@ app.get("/", (req: Request, res: Response, next: NextFunction): void => {
     }
 });
 
-function getDeviceInfo(mac_address: string){
-    return saved_devices.find(device => device.getMacAddress() == mac_address);
-}
-
-app.post("/message", (req: Request, res: Response, next: NextFunction): void => {
-try {
+app.post("/test_ping" , async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try{
         let mac_address: string = req.body.mac_address;
-        let message: string = req.body.message;
 
-        let device = getDeviceInfo(mac_address);
-        device?.addPendingMessage(
-            new PagerTask(PagerAction.DISPLAY, [
-                message, //text
-                2, //line
-                65535, //text color
-                0 //bg color
-            ])
-        );
-        console.log("Messege added to queue");
-        res.send("Messege added to queue");
+        if(collections.devices ==undefined) throw new Error("Database not connected");
+        let device = await collections.devices.findOne({ mac_address: mac_address }) as Device;
+
+        if (device){
+            const newMessage = new PagerTask(PagerAction.DISPLAY, [
+                "I'm " + mac_address, // text
+                2, // line
+                65535, // text color
+                0 // bg color
+            ]);
+            device.pending_messages.push(newMessage);
+
+            await collections.devices.updateOne(
+                { mac_address: mac_address },
+                { $set: { pending_messages: device.pending_messages } }
+            );
+        }
+
     } catch (error) {
         next(error);
     }
 });
 
-app.post("/calibration", (req: Request, res: Response, next: NextFunction): void => {
+app.post("/message", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        let mac_address: string = req.body.mac_address;
+        let message: string = req.body.message;
+
+        if(collections.devices == undefined) throw new Error("Database not connected");
+        let device = await collections.devices.findOne({ mac_address: mac_address }) as Device;
+
+        if (device) {
+
+            const newMessage = new PagerTask(PagerAction.DISPLAY, [
+                message, // text
+                2, // line
+                65535, // text color
+                0 // bg color
+            ]);
+            device.pending_messages.push(newMessage);
+
+
+            await collections.devices.updateOne(
+                { mac_address: mac_address },
+                { $set: { pending_messages: device.pending_messages } }
+            );
+
+            console.log("Message added to queue");
+            res.send("Message added to queue");
+        } else {
+            res.status(404).send(`Device with mac_address ${mac_address} not found`);
+        }
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.post("/calibration", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         let mac_address: string = req.body.mac_address;
         let calibration_mode: boolean = req.body.calibration_mode;
         let room: string = req.body.room;
 
-        if(!(room in saved_rooms)){
-            saved_rooms.push(room);
+        if (collections.devices == undefined) throw new Error("Database not connected");
+        let device = await collections.devices.findOne({ mac_address: mac_address }) as Device;
+
+        if (device) {
+            device.calibration_mode = calibration_mode;
+            device.calibrated_room = room;
+
+            const message = calibration_mode ? "Online [CAL]: " + room : "Online";
+            const newMessage = new PagerTask(PagerAction.DISPLAY, [
+                message, // text
+                0, // line
+                2016, // text color
+                0 // bg color
+            ]);
+            device.pending_messages.push(newMessage);
+
+            await collections.devices.updateOne(
+                { mac_address: mac_address },
+                { $set: { calibration_mode: device.calibration_mode, calibrated_room: device.calibrated_room, pending_messages: device.pending_messages } }
+            );
+
+            console.log("Calibration mode set to: " + calibration_mode + " for device: " + mac_address + " in room: " + room);
+            res.send("Calibration mode set to: " + calibration_mode + " for device: " + mac_address + " in room: " + room);
+        } else {
+            res.status(404).send(`Device with mac_address ${mac_address} not found`);
         }
-
-        let device = getDeviceInfo(mac_address);
-        device?.setCalibrationMode(calibration_mode);
-        device?.setCalibratedRoom(room)
-        let message = calibration_mode ? "Online [CAL]: " + room : "Online";
-        device?.addPendingMessage(
-            new PagerTask(PagerAction.DISPLAY, [
-                message, //text
-                0, //line
-                2016, //text color
-                0 //bg color
-            ])
-        );
-
-        console.log("Calibration mode set to: " + calibration_mode + " for device: " + mac_address + " in room: " + room);
-        res.send("Calibration mode set to: " + calibration_mode + " for device: " + mac_address + " in room: " + room);
     } catch (error) {
         next(error);
     }
@@ -128,47 +169,36 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
         let mac_address: string = req.body.mac_address;
         let scan_results: NetworkInfo[] = req.body.scan_results;
 
-            // Create a new Device object
+        if(collections.devices == undefined || collections.rooms == undefined) throw new Error("Database not connected");
+        let device = await collections.devices.findOne({ mac_address: mac_address }) as Device;
+
+        if (device) {
+            // Update the last_connected time
+            device.last_connected = new Date();
+            await collections.devices.updateOne(
+                { mac_address: mac_address },
+                { $set: { last_connected: device.last_connected } }
+            );
+            console.log(`Updated last_connected time for device with mac_address ${mac_address}`);
+
+        } else {
+
             const newDevice = new Device(mac_address, "", new Date(), "", false, "", 100, []);
-
-            try {
-                const response = await fetch('http://localhost:8080/devices/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(newDevice),
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                console.log(`Successfully created a new device with mac_address ${mac_address}`);
-            } catch (error) {
-                console.error('Error creating new device:', error);
-            }
-
+            await collections.devices.insertOne(newDevice);
+            console.log(`Successfully created a new device with mac_address ${mac_address}`);
+            device = newDevice;
+        }
         console.log("Ping received from: " + mac_address);
-        let device = getDeviceInfo(mac_address);
 
-        if(device?.getCalibrationMode()){
+        if(device.calibration_mode){
 
-            // @ts-ignore
-            collections.rooms.findOne({ "name": device?.getCalibratedRoom() }).then((room) => {
-                if(room){
-                    console.log("Updating room: " + device?.getCalibratedRoom() + " with scan results");
-                    // @ts-ignore
-                    collections.rooms.updateOne(
-                        { "name": device?.getCalibratedRoom() },
+            collections.rooms.findOne({ "name": device.calibrated_room }).then((room) => {
+                    console.log("Updating room: " + device.calibrated_room + " with scan results");
+                    if(collections.rooms != undefined)
+                        collections.rooms.updateOne(
+                        { "name": device.calibrated_room },
                         { $push: { "scan_results": scan_results } } as any
                     );
-                }
-                else{
-                    console.log("Creating new room: " + device?.getCalibratedRoom() + " with scan results");
-                    // @ts-ignore
-                    collections.rooms.insertOne({ "name": device?.getCalibratedRoom(), "scan_results": [scan_results] });
-                }
             });
         }
         else if(locationMode){
@@ -184,16 +214,20 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                const locationName = data.name;
-                device?.setLocation(locationName);
+                device.location = data.name;
+                collections.devices.updateOne({"mac_address": mac_address}, {$set: {"location": device.location}});
             } catch (error) {
                 console.error('Error fetching location:', error);
             }
         }
 
         let pagerTasks: PagerTask[] = [];
-        if(device?.getHasPendingMessages()){
-            pagerTasks.push(device?.getFirstPendingMessage());
+        if(device.pending_messages.length > 0){
+            pagerTasks.push(device.pending_messages.shift() as PagerTask);
+            await collections.devices.updateOne(
+                { mac_address: mac_address },
+                { $set: { pending_messages: device.pending_messages } }
+            );
         }
         else{
             pagerTasks.push(new PagerTask(PagerAction.DO_WHATEVER, []));

@@ -10,5 +10,5 @@ export default class Device {
     public calibrated_room: string,
     public battery_level: number,
     public pending_messages: PagerTask[],
-    public id?: ObjectId) {}
+    public _id?: ObjectId) {}
 }
