@@ -1,9 +1,12 @@
 import express, {NextFunction, Request, Response} from "express";
 import path from "path";
-import {DeviceInfo, NetworkInfo, PagerAction, PagerTask, ServerResponse} from './defines';
+import {NetworkInfo, PagerAction, PagerTask, ServerResponse} from './defines';
 import {collections, connect} from "./services/database.service";
 import {devicesRouter} from "./routes/devices.router";
+import {roomsRouter} from "./routes/rooms.router";
 import Device from "./model/device";
+import Room from "./model/room";
+import {ObjectId} from "mongodb";
 
 const app = express();
 const PORT = 8080;
@@ -23,6 +26,7 @@ initDbConnection().then(() => {
     setTimeout(initDbConnection, 10000);
 });
 app.use("/devices", devicesRouter);
+app.use("/rooms", roomsRouter);
 
 let locationMode: boolean = false;
 
@@ -97,36 +101,64 @@ app.post("/message", async (req: Request, res: Response, next: NextFunction): Pr
 
 app.post("/calibration", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        let mac_address: string = req.body.mac_address;
-        let calibration_mode: boolean = req.body.calibration_mode;
-        let room: string = req.body.room;
+        let devices: string[] = req.body.devices;
+        let roomId: string = req.body.roomId;
 
-        if (collections.devices == undefined) throw new Error("Database not connected");
-        let device = await collections.devices.findOne({ mac_address: mac_address }) as Device;
+        if (collections.devices == undefined || collections.rooms == undefined) throw new Error("Database not connected");
 
-        if (device) {
-            device.calibration_mode = calibration_mode;
-            device.calibrated_room = room;
+        let allDevices = await collections.devices.find({}).toArray() as Device[];
 
-            const message = calibration_mode ? "Online [CAL]: " + room : "Online";
-            const newMessage = new PagerTask(PagerAction.DISPLAY, [
-                message, // text
-                0, // line
-                2016, // text color
-                0 // bg color
-            ]);
-            device.pending_messages.push(newMessage);
+        let room = await collections.rooms.findOne({ _id: new ObjectId(roomId) }) as Room;
 
-            await collections.devices.updateOne(
-                { mac_address: mac_address },
-                { $set: { calibration_mode: device.calibration_mode, calibrated_room: device.calibrated_room, pending_messages: device.pending_messages } }
-            );
+        for (let device of allDevices) {
+            if (devices.includes(device.mac_address)) {
+                device.calibration_mode = true;
+                device.calibrated_room = new ObjectId(roomId);
 
-            console.log("Calibration mode set to: " + calibration_mode + " for device: " + mac_address + " in room: " + room);
-            res.send("Calibration mode set to: " + calibration_mode + " for device: " + mac_address + " in room: " + room);
-        } else {
-            res.status(404).send(`Device with mac_address ${mac_address} not found`);
+                const message = "Online [CAL]: " + room.name;
+                    const newMessage = new PagerTask(PagerAction.DISPLAY, [
+                        message, // text
+                        0, // line
+                        2016, // text color
+                        0 // bg color
+                    ]);
+                    device.pending_messages.push(newMessage);
+
+                await collections.devices.updateOne(
+                            { mac_address: device.mac_address },
+                            { $set: { calibration_mode: device.calibration_mode, calibrated_room: device.calibrated_room, pending_messages: device.pending_messages } }
+                        );
+                console.log("Calibration mode set to: " + device.calibration_mode + " for device: " + device.mac_address + " in room: " + roomId);
+            }
+            else if (device.calibrated_room?.equals(new ObjectId(roomId))) {
+                device.calibration_mode = false;
+                device.calibrated_room = undefined;
+
+                const message = "Online";
+                const newMessage = new PagerTask(PagerAction.DISPLAY, [
+                    message, // text
+                    0, // line
+                    2016, // text color
+                    0 // bg color
+                ]);
+                device.pending_messages.push(newMessage);
+
+                await collections.devices.updateOne(
+                    { mac_address: device.mac_address },
+                    { $set: { calibration_mode: device.calibration_mode, calibrated_room: device.calibrated_room, pending_messages: device.pending_messages } }
+                );
+
+                room.last_calibration = new Date();
+                room.calibrated = true && room.scan_results.length > 0;
+                await collections.rooms.updateOne(
+                    { _id: new ObjectId(roomId) },
+                    { $set: { last_callibration: room.last_calibration, calibrated: room.calibrated } }
+                );
+
+                console.log("Calibration mode set to: " + device.calibration_mode + " for device: " + device.mac_address + " in room: " + roomId);
+            }
         }
+        res.send("Calibration mode set to: " + devices);
     } catch (error) {
         next(error);
     }
@@ -183,7 +215,7 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
 
         } else {
 
-            const newDevice = new Device(mac_address, "", new Date(), "", false, "", 100, []);
+            const newDevice = new Device(mac_address, "", new Date(), false, 100, []);
             await collections.devices.insertOne(newDevice);
             console.log(`Successfully created a new device with mac_address ${mac_address}`);
             device = newDevice;
@@ -192,14 +224,15 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
 
         if(device.calibration_mode){
 
-            collections.rooms.findOne({ "name": device.calibrated_room }).then((room) => {
-                    console.log("Updating room: " + device.calibrated_room + " with scan results");
-                    if(collections.rooms != undefined)
-                        collections.rooms.updateOne(
-                        { "name": device.calibrated_room },
-                        { $push: { "scan_results": scan_results } } as any
-                    );
-            });
+            let calibratedRoom = await collections.rooms.findOne({ _id: device.calibrated_room }) as Room;
+            if(calibratedRoom){
+                // @ts-ignore
+                calibratedRoom.scan_results.push(scan_results);
+                await collections.rooms.updateOne(
+                    { _id: device.calibrated_room },
+                    { $set: { scan_results: calibratedRoom.scan_results } }
+                );
+            }
         }
         else if(locationMode){
             try {
@@ -214,8 +247,8 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                device.location = data.name;
-                collections.devices.updateOne({"mac_address": mac_address}, {$set: {"location": device.location}});
+                let locationId = data.id;
+                collections.devices.updateOne({"mac_address": mac_address}, {$set: {"location": new ObjectId(locationId)}});
             } catch (error) {
                 console.error('Error fetching location:', error);
             }
@@ -241,5 +274,5 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
 
 app.listen(PORT, () => {
     console.log(`App listening on port ${PORT}`)
-})
+});
 

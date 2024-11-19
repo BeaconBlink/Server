@@ -1,11 +1,11 @@
 import { ObjectId } from "mongodb";
 import {NetworkInfo} from "../defines";
 
-export default class Game {
+export default class Room {
     constructor(public name: string,
-                public callibrated: boolean,
-                public last_callibration: Date,
+                public calibrated: boolean,
+                public last_calibration: Date,
                 public tags: string[],
                 public scan_results: NetworkInfo[],
-                public id?: ObjectId) {}
+                public _id?: ObjectId) {}
 }

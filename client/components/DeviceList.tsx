@@ -35,7 +35,7 @@ const DeviceList = () => {
     };
 
     const sortedDevices = devices.sort((a, b) => {
-        return Number(isActive(new Date(b.last_connected))) - Number(isActive(new Date(a.last_connected)));
+        return new Date(b.last_connected).getTime() - new Date(a.last_connected).getTime();
     });
 
     return (

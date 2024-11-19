@@ -17,6 +17,37 @@ devicesRouter.get("/", async (_req: Request, res: Response) => {
     }
 });
 
+devicesRouter.post("/located", async (_req: Request, res: Response) => {
+    const roomId = _req.body.roomId;
+
+    if(collections.devices ==undefined) throw new Error("Database not connected");
+
+    try{
+        const devices = await collections.devices.find({ location: new ObjectId(roomId) }).toArray();
+
+        if(devices) {
+            res.status(200).send(devices);
+        }
+    } catch (error: any) {
+        res.status(500).send(error.message);
+    }
+});
+
+devicesRouter.post("/calibrating", async (_req: Request, res: Response) => {
+    const roomId = _req.body.roomId;
+
+    if(collections.devices ==undefined) throw new Error("Database not connected");
+    try{
+        const devices = await collections.devices.find({ calibrated_room: new ObjectId(roomId), calibration_mode: true}).toArray();
+
+        if(devices) {
+            res.status(200).send(devices);
+        }
+    } catch (error: any) {
+        res.status(500).send(error.message);
+    }
+});
+
 devicesRouter.get("/:mac_address", async (req: Request, res: Response) => {
     const mac_address = req?.params?.mac_address;
 

@@ -2,7 +2,8 @@ import { MongoClient, Collection } from 'mongodb';
 
 export const collections: {
     rooms?: Collection,
-    devices?: Collection
+    devices?: Collection,
+    client?: MongoClient
 } = {}
 
 export async function connect(){
@@ -21,6 +22,7 @@ export async function connect(){
         await db.createCollection('devices');
     }
 
+    collections.client = client;
     collections.rooms = db.collection('rooms');
     collections.devices = db.collection('devices');
 }

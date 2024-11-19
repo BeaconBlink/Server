@@ -1,8 +1,10 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import { FaPen, FaTrashAlt, FaSignal } from 'react-icons/fa';
 import {TbBattery, TbBattery1, TbBattery2, TbBattery3, TbBattery4, TbLoader} from "react-icons/tb";
 import Device from "../../src/model/device";
 import axios from "axios";
+import {ObjectId} from "mongodb";
+import Room from "../../src/model/room";
 
 interface DeviceListElementProps {
     device: Device
@@ -18,6 +20,45 @@ const DeviceListElement: React.FC<DeviceListElementProps> = ({
     const [isEditingName, setIsEditingName] = useState(false);
     const [newAlias, setNewAlias] = useState(device.alias);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [deviceLocation, setDeviceLocation] = useState('');
+    const [calibratingRoom, setCalibratingRoom] = useState('');
+
+    const getRoomByID = async (roomId: ObjectId) => {
+        try {
+            const response = await axios.get(`/rooms/${roomId}`);
+            console.log(response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching room:', error);
+        }
+    };
+
+    useEffect(() => {
+        setNewAlias(device.alias);
+    }, []);
+
+    useEffect(() => {
+        const fetchDeviceLocation = async () => {
+            if (device.location) {
+                const room = await getRoomByID(device.location) as Room;
+                setDeviceLocation(room.name);
+            }
+        };
+
+        fetchDeviceLocation();
+    }, []);
+
+    useEffect(() => {
+        const fetchCalibratingRoom = async () => {
+            if (device.calibrated_room) {
+                const room = await getRoomByID(device.calibrated_room) as Room;
+                setCalibratingRoom(room.name);
+            }
+        };
+
+        fetchCalibratingRoom();
+    }, []);
+
 
     const handleTestPing = async () => {
         try {
@@ -31,6 +72,7 @@ const DeviceListElement: React.FC<DeviceListElementProps> = ({
         try {
             await axios.delete(`devices/${device.mac_address}`);
             onDelete(device);
+            setShowDeleteDialog(false);
         } catch (error) {
             console.error('Error deleting device:', error);
         }
@@ -57,6 +99,7 @@ const DeviceListElement: React.FC<DeviceListElementProps> = ({
             }
 
             setIsEditingName(false);
+            setNewAlias(device.alias);
         } catch (error) {
             console.error('Error updating device name:', error);
         }
@@ -87,7 +130,6 @@ const DeviceListElement: React.FC<DeviceListElementProps> = ({
                         {isEditingName ? (
                             <input
                                 type="text"
-                                value={newAlias}
                                 onChange={(e) => setNewAlias(e.target.value)}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
@@ -102,7 +144,7 @@ const DeviceListElement: React.FC<DeviceListElementProps> = ({
                                 className="text-accenct-color2 font-bold bg-transparent border-b border-accenct-color2 outline-none"
                             />
                         ) : (
-                            <h1 className="text-accenct-color2 font-bold">{device.alias !== "" ? newAlias : device.mac_address}</h1>
+                            <h1 className="text-accenct-color2 font-bold">{device.alias !== "" ? device.alias : device.mac_address}</h1>
                         )}
                         {(device.alias != "" || isEditingName) &&
                             <p className="text-accenct-color2 opacity-50">Mac address: {device.mac_address}</p>}
@@ -114,14 +156,14 @@ const DeviceListElement: React.FC<DeviceListElementProps> = ({
                 </div>
 
                 <div className="flex h-1/3 flex-col justify-evenly">
-                    <h1 className="text-accenct-color2 font-bold">Last location: {device.location}</h1>
+                    <h1 className="text-accenct-color2 font-bold">Last location: {deviceLocation}</h1>
                     <p className="text-accenct-color2 opacity-50">Last login: {device.last_connected.toString()}</p>
                 </div>
 
                 {device.calibration_mode &&
                     <div className="flex h-1/3 items-center space-x-2">
                         <TbLoader size={32} className={`${isActive ? 'text-green-500' : 'text-red-500'}`}/>
-                        <p className="text-accenct-color"> Calibrating: {device.calibrated_room}</p>
+                        <p className="text-accenct-color"> Calibrating: {calibratingRoom}</p>
                     </div>}
             </div>
 
