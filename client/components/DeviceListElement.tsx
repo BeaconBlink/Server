@@ -141,29 +141,29 @@ const DeviceListElement: React.FC<DeviceListElementProps> = ({
                                     }
                                 }}
                                 autoFocus
-                                className="text-accenct-color2 font-bold bg-transparent border-b border-accenct-color2 outline-none"
+                                className="text-accent-color2 font-bold bg-transparent border-b border-accenct-color2 outline-none"
                             />
                         ) : (
-                            <h1 className="text-accenct-color2 font-bold">{device.alias !== "" ? device.alias : device.mac_address}</h1>
+                            <h1 className="text-accent-color2 font-bold">{device.alias !== "" ? device.alias : device.mac_address}</h1>
                         )}
                         {(device.alias != "" || isEditingName) &&
-                            <p className="text-accenct-color2 opacity-50">Mac address: {device.mac_address}</p>}
+                            <p className="text-accent-color2 opacity-50">Mac address: {device.mac_address}</p>}
                     </div>
                     <div className="w-1/4 flex justify-end items-center">
                         {getBatteryIcon(device.battery_level)}
-                        <p className="text-accenct-color">{device.battery_level}%</p>
+                        <p className="text-accent-color">{device.battery_level}%</p>
                     </div>
                 </div>
 
                 <div className="flex h-1/3 flex-col justify-evenly">
-                    <h1 className="text-accenct-color2 font-bold">Last location: {deviceLocation}</h1>
-                    <p className="text-accenct-color2 opacity-50">Last login: {device.last_connected.toString()}</p>
+                    <h1 className="text-accent-color2 font-bold">Last location: {deviceLocation}</h1>
+                    <p className="text-accent-color2 opacity-50">Last login: {device.last_connected.toString()}</p>
                 </div>
 
                 {device.calibration_mode &&
                     <div className="flex h-1/3 items-center space-x-2">
                         <TbLoader size={32} className={`${isActive ? 'text-green-500' : 'text-red-500'}`}/>
-                        <p className="text-accenct-color"> Calibrating: {calibratingRoom}</p>
+                        <p className="text-accent-color"> Calibrating: {calibratingRoom}</p>
                     </div>}
             </div>
 
@@ -171,19 +171,19 @@ const DeviceListElement: React.FC<DeviceListElementProps> = ({
                 <div className=" flex items-center h-2/3 justify-evenly space-x-4">
                     <button
                         onClick={() => setIsEditingName(!isEditingName)}
-                        className="w-1/6 md:w-1/4 flex justify-evenly items-center px-4 py-2 text-accenct-color bg-accenct-color2 rounded-md focus:outline-none"
+                        className="w-1/6 md:w-1/4 flex justify-evenly items-center px-4 py-2 text-accent-color bg-accent-color2 rounded-md focus:outline-none"
                     >
                         <FaPen/>
                         <span className="hidden md:block">Change name</span>
                     </button>
                     <button onClick={handleTestPing}
-                            className="w-2/3 md:w-1/4 flex justify-evenly items-center px-4 py-2  text-accenct-color bg-accenct-color2 rounded-md focus:outline-none">
+                            className="w-2/3 md:w-1/4 flex justify-evenly items-center px-4 py-2  text-accent-color bg-accent-color2 rounded-md focus:outline-none">
                         <FaSignal/>
                         <span className="text-xs md:text-base">Test Ping</span>
                     </button>
                     <button
                         onClick={() => setShowDeleteDialog(true)}
-                        className="w-1/6 md:w-1/4 flex justify-evenly items-center px-4 py-2 text-accenct-color bg-red-500 hover:bg-red-600 rounded-md focus:outline-none"
+                        className="w-1/6 md:w-1/4 flex justify-evenly items-center px-4 py-2 text-accent-color bg-red-500 hover:bg-red-600 rounded-md focus:outline-none"
                     >
                         <FaTrashAlt/>
                         <span className="hidden md:block">Delete</span>
@@ -197,8 +197,8 @@ const DeviceListElement: React.FC<DeviceListElementProps> = ({
             {showDeleteDialog && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-main-color rounded-lg p-6 max-w-md w-full mx-4">
-                        <h2 className="text-xl text-accenct-color2 font-bold mb-4">Delete Device</h2>
-                        <p className="mb-6 text-accenct-color">
+                        <h2 className="text-xl text-accent-color2 font-bold mb-4">Delete Device</h2>
+                        <p className="mb-6 text-accent-color">
                             Are you sure you want to delete device{' '}
                             <span className="font-semibold">
                                 {device.alias || device.mac_address}
@@ -208,13 +208,13 @@ const DeviceListElement: React.FC<DeviceListElementProps> = ({
                         <div className="flex justify-end space-x-4">
                             <button
                                 onClick={() => setShowDeleteDialog(false)}
-                                className="px-4 py-2 bg-complementary-color text-accenct-color2 hover:bg-black rounded-md"
+                                className="px-4 py-2 bg-complementary-color text-accent-color2 hover:bg-black rounded-md"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleDelete}
-                                className="px-4 py-2 bg-red-500 text-accenct-color rounded-md hover:bg-red-600"
+                                className="px-4 py-2 bg-red-500 text-accent-color rounded-md hover:bg-red-600"
                             >
                                 Delete
                             </button>

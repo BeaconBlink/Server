@@ -19,6 +19,17 @@ roomsRouter.get("/", async (_req: Request, res: Response) => {
     }
 });
 
+roomsRouter.get("/tags", async (req: Request, res: Response) => {
+    try {
+        // @ts-ignore
+        const tags = (await collections.rooms.distinct("tags")) as string[];
+
+        res.status(200).send(tags);
+    } catch (error : any) {
+        res.status(500).send(error.message);
+    }
+});
+
 roomsRouter.get("/:id", async (req: Request, res: Response) => {
     const id = req?.params?.id;
 

@@ -4,8 +4,8 @@
 * {
     --main-color: #1F2937;
     --complementary-color: #4c5666;
-    --accenct-color: #dbf2ff;
-    --accenct-color2: #dea01e;
+    --accent-color: #dbf2ff;
+    --accent-color2: #dea01e;
 
 }
 
@@ -35,35 +35,35 @@
     background-color: var(--complementary-color);
 }
 
-.accenct-color{
-    background-color: var(--accenct-color);
-    color: var(--accenct-color);
+.accent-color{
+    background-color: var(--accent-color);
+    color: var(--accent-color);
 }
 
-.text-accenct-color {
-    color: var(--accenct-color);
+.text-accent-color {
+    color: var(--accent-color);
 }
 
-.bg-accenct-color {
-    background-color: var(--accenct-color);
+.bg-accent-color {
+    background-color: var(--accent-color);
 }
 
-.accenct-color2 {
-    background-color: var(--accenct-color2);
-    color: var(--accenct-color2);
+.accent-color2 {
+    background-color: var(--accent-color2);
+    color: var(--accent-color2);
 }
 
-.text-accenct-color2 {
-    color: var(--accenct-color2);
+.text-accent-color2 {
+    color: var(--accent-color2);
 }
 
-.bg-accenct-color2 {
-    background-color: var(--accenct-color2);
+.bg-accent-color2 {
+    background-color: var(--accent-color2);
 }
 
 .main-theme{
     background-color: var(--main-color);
-    color: var(--accenct-color);
+    color: var(--accent-color);
 }
 
 body {

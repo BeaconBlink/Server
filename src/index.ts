@@ -147,12 +147,13 @@ app.post("/calibration", async (req: Request, res: Response, next: NextFunction)
                     { mac_address: device.mac_address },
                     { $set: { calibration_mode: device.calibration_mode, calibrated_room: device.calibrated_room, pending_messages: device.pending_messages } }
                 );
+                let hasScanned = room.scan_results.length > 0;
 
-                room.last_calibration = new Date();
-                room.calibrated = true && room.scan_results.length > 0;
+                room.last_calibration = hasScanned ? new Date() : undefined;
+                room.calibrated = hasScanned;
                 await collections.rooms.updateOne(
                     { _id: new ObjectId(roomId) },
-                    { $set: { last_callibration: room.last_calibration, calibrated: room.calibrated } }
+                    { $set: { last_calibration: room.last_calibration, calibrated: room.calibrated } }
                 );
 
                 console.log("Calibration mode set to: " + device.calibration_mode + " for device: " + device.mac_address + " in room: " + roomId);
