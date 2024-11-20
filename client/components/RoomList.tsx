@@ -33,7 +33,7 @@ const RoomList = () => {
         if (newRoomName.trim() === "") return;
 
         // @ts-ignore
-        const newRoom = new Room(newRoomName, false, null, [], []);
+        const newRoom = new Room(newRoomName, false, [], []);
 
         const response = await fetch('/rooms', {
             method: 'POST',

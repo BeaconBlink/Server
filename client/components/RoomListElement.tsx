@@ -70,7 +70,7 @@ const RoomListElement: React.FC<RoomListElementProps> = ({ room, onDelete, avail
             ]);
 
             setCalibratingDevices(calibratingDevs);
-            setAvailableTags(tags)
+            setAvailableTags(tags);
             // Set initial selected devices based on calibrating devices
             setSelectedDevices(calibratingDevs.map((device: Device) => device.mac_address));
             setSelectedTags(room.tags);
@@ -92,8 +92,10 @@ const RoomListElement: React.FC<RoomListElementProps> = ({ room, onDelete, avail
                             return { ...device, calibration_mode: true, calibrated_room: room._id };
                         }
                         else{
-                            if(device.calibrated_room != undefined && device.calibration_mode == true && device.calibrated_room.equals(room._id)) {
-                                return { ...device, calibration_mode: false, calibrated_room: undefined };
+                            if(device.calibrated_room != undefined && device.calibration_mode == true){
+                                if(device.calibrated_room.equals(room._id)){
+                                    return { ...device, calibration_mode: false, calibrated_room: undefined };
+                                }
                             }
                         }
                         return device;
