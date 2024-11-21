@@ -32,13 +32,15 @@ roomsRouter.get("/tags", async (req: Request, res: Response) => {
 
 roomsRouter.get("/:id", async (req: Request, res: Response) => {
     const id = req?.params?.id;
-
     try {
         // @ts-ignore
         const room = await collections.rooms.findOne({ _id :new ObjectId(id) }) as Room;
 
         if (room) {
             res.status(200).send(room);
+        }
+        else{
+            res.status(404).send(`Unable to find room with matching id: ${req.params.id}`);
         }
     } catch (error) {
         res.status(404).send(`Unable to find room with matching id: ${req.params.id}`);

@@ -9,22 +9,24 @@ import Room from "../../src/model/room";
 interface DeviceListElementProps {
     device: Device
     isActive: boolean
-    onDelete: (device: Device) => void;
+    onDelete: (device: Device) => void
+    deviceLocation: string;
 }
 
 const DeviceListElement: React.FC<DeviceListElementProps> = ({
                                                                  device,
                                                                  onDelete,
-                                                                 isActive
+                                                                 isActive,
+                                                                deviceLocation
                                                              }) => {
     const [isEditingName, setIsEditingName] = useState(false);
     const [newAlias, setNewAlias] = useState(device.alias);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [deviceLocation, setDeviceLocation] = useState('');
     const [calibratingRoom, setCalibratingRoom] = useState('');
 
     const getRoomByID = async (roomId: ObjectId) => {
         try {
+            console.log(roomId)
             const response = await axios.get(`/rooms/${roomId}`);
             console.log(response.data);
             return response.data;
@@ -35,17 +37,6 @@ const DeviceListElement: React.FC<DeviceListElementProps> = ({
 
     useEffect(() => {
         setNewAlias(device.alias);
-    }, []);
-
-    useEffect(() => {
-        const fetchDeviceLocation = async () => {
-            if (device.location) {
-                const room = await getRoomByID(device.location) as Room;
-                setDeviceLocation(room.name);
-            }
-        };
-
-        fetchDeviceLocation();
     }, []);
 
     useEffect(() => {

@@ -1,12 +1,31 @@
 import React, {useEffect, useState} from 'react';
 import DeviceListElement from "./DeviceListElement";
 import Device from "../../src/model/device";
+import Room from "../../src/model/room";
 
 const DATA_REFRESH_RATE = 5*1000;
 
 const DeviceList = () => {
 
     const [devices, setDevices] = useState<Device[]>([]);
+    const [deviceLocations, setDeviceLocations] = useState<{ [key: string]: string }>({});
+
+    const getRoomNameById = async (roomId: string) => {
+        const response = await fetch(`/rooms/${roomId}`);
+        const data = await response.json() as Room;
+        return data.name;
+    }
+
+    const fetchDeviceLocations = async (devices: Device[]) => {
+        const locations: { [key: string]: string } = {};
+        for (const device of devices) {
+            if (device.location) {
+                const roomName = await getRoomNameById(device.location.toString());
+                locations[device.mac_address] = roomName;
+            }
+        }
+        setDeviceLocations(locations);
+    };
 
     const onDeleteDevice = (device: Device) => {
         setDevices(devices.filter((d) => d.mac_address !== device.mac_address));
@@ -16,8 +35,8 @@ const DeviceList = () => {
         const fetchData = async () => {
             const response = await fetch('/devices');
             const data = await response.json();
-            console.log("fetched data")
             setDevices(data);
+            await fetchDeviceLocations(data);
         };
 
         fetchData().catch((error) => {
@@ -41,7 +60,7 @@ const DeviceList = () => {
     return (
         <div className="flex flex-wrap justify-evenly items-start">
             {sortedDevices.map((device, index) => (
-                <DeviceListElement key={index} device={device} onDelete={onDeleteDevice} isActive={isActive(new Date(device.last_connected))}/>
+                <DeviceListElement key={index} device={device} onDelete={onDeleteDevice} isActive={isActive(new Date(device.last_connected))} deviceLocation={deviceLocations[device.mac_address] || ""}/>
             ))}
         </div>
     );

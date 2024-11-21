@@ -168,10 +168,10 @@ app.post("/calibration", async (req: Request, res: Response, next: NextFunction)
 app.post("/location", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         let flag: boolean = req.body.locationMode;
-        if(locationMode){
-            res.send("Location mode already set to: " + flag);
-            return;
-        }
+        // if(locationMode){
+        //     res.send("Location mode already set to: " + flag);
+        //     return;
+        // }
         try {
             const response = await fetch('http://mapping:8083/location/mode', {
                 method: 'POST',
