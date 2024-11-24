@@ -1,58 +1,42 @@
 import React, {useEffect, useState} from 'react';
-import {DeviceInfo} from "../../src/defines";
 import DeviceListElement from "./DeviceListElement";
+import Device from "../../src/model/device";
+import Room from "../../src/model/room";
 
 const DATA_REFRESH_RATE = 5*1000;
 
 const DeviceList = () => {
 
-    const [devices, setDevices] = useState<DeviceInfo[]>([]);
-    const [message, setMessage] = useState<string>("");
-    const [locationMode, setLocationMode] = useState(false);
+    const [devices, setDevices] = useState<Device[]>([]);
+    const [deviceLocations, setDeviceLocations] = useState<{ [key: string]: string }>({});
 
-    const sendMessage = async (mac_address: string) => {
-        try {
-            const response = await fetch('/message', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ mac_address, message }),
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            console.log("Message sent");
-            setMessage("");
-        } catch (error) {
-            console.error('Error sending message:', error);
-        }
+    const getRoomNameById = async (roomId: string) => {
+        const response = await fetch(`/rooms/${roomId}`);
+        const data = await response.json() as Room;
+        return data.name;
     }
 
-    const handleLocationMode = async () => {
-        try {
-            const response = await fetch('/location', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ locationMode: !locationMode }), // toggle locationMode
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+    const fetchDeviceLocations = async (devices: Device[]) => {
+        const locations: { [key: string]: string } = {};
+        for (const device of devices) {
+            if (device.location) {
+                const roomName = await getRoomNameById(device.location.toString());
+                locations[device.mac_address] = roomName;
             }
-            setLocationMode(true); // update state
-        } catch (error) {
-            console.error('Error setting location mode:', error);
         }
-    }
+        setDeviceLocations(locations);
+    };
+
+    const onDeleteDevice = (device: Device) => {
+        setDevices(devices.filter((d) => d.mac_address !== device.mac_address));
+    };
 
     useEffect(() => {
         const fetchData = async () => {
             const response = await fetch('/devices');
             const data = await response.json();
-            console.log("fetched data")
             setDevices(data);
+            await fetchDeviceLocations(data);
         };
 
         fetchData().catch((error) => {
@@ -64,16 +48,19 @@ const DeviceList = () => {
         return () => clearInterval(intervalId);
     }, []);
 
+    const isActive = (lastConnected: Date) => {
+        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+        return lastConnected >= tenMinutesAgo;
+    };
+
+    const sortedDevices = devices.sort((a, b) => {
+        return new Date(b.last_connected).getTime() - new Date(a.last_connected).getTime();
+    });
+
     return (
-        <div id="device-list main_theme">
-            <h2 className="title">Device List</h2>
-            <input type="text" className="message-input" value={message} onChange={(e) => setMessage(e.target.value)}
-                   placeholder="Enter message"/>
-            <button onClick={handleLocationMode} disabled={locationMode}>
-                {locationMode ? 'Location Mode Enabled' : 'Enable Location Mode'}
-            </button>
-            {devices.map((device, index) => (
-                <DeviceListElement index={index} device={device} sendMessage={sendMessage}></DeviceListElement>
+        <div className="flex flex-wrap justify-evenly items-start">
+            {sortedDevices.map((device, index) => (
+                <DeviceListElement key={index} device={device} onDelete={onDeleteDevice} isActive={isActive(new Date(device.last_connected))} deviceLocation={deviceLocations[device.mac_address] || ""}/>
             ))}
         </div>
     );
