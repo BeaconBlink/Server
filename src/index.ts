@@ -67,33 +67,24 @@ app.post("/test_ping" , async (req: Request, res: Response, next: NextFunction):
 
 app.post("/message", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        let mac_address: string = req.body.mac_address;
+        let mac_addresses: string[] = req.body.mac_addresses;
         let message: string = req.body.message;
 
         if(collections.devices == undefined) throw new Error("Database not connected");
-        let device = await collections.devices.findOne({ mac_address: mac_address }) as Device;
 
-        if (device) {
-
-            const newMessage = new PagerTask(PagerAction.DISPLAY, [
+        const newMessage = new PagerTask(PagerAction.DISPLAY, [
                 message, // text
                 2, // line
                 65535, // text color
                 0 // bg color
-            ]);
-            device.pending_messages.push(newMessage);
+        ]);
 
+        // @ts-ignore
+        await collections.devices.updateMany({mac_address: {$in: mac_addresses}}, {$push: {pending_messages: newMessage}});
 
-            await collections.devices.updateOne(
-                { mac_address: mac_address },
-                { $set: { pending_messages: device.pending_messages } }
-            );
+       console.log("Message added to queue");
+       res.send("Message added to queue");
 
-            console.log("Message added to queue");
-            res.send("Message added to queue");
-        } else {
-            res.status(404).send(`Device with mac_address ${mac_address} not found`);
-        }
     } catch (error) {
         next(error);
     }
