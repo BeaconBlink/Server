@@ -106,18 +106,9 @@ app.post("/calibration", async (req: Request, res: Response, next: NextFunction)
                 device.calibration_mode = true;
                 device.calibrated_room = new ObjectId(roomId);
 
-                const message = "Online [CAL]: " + room.name;
-                    const newMessage = new PagerTask(PagerAction.DISPLAY, [
-                        message, // text
-                        0, // line
-                        2016, // text color
-                        0 // bg color
-                    ]);
-                    device.pending_messages.push(newMessage);
-
                 await collections.devices.updateOne(
                             { mac_address: device.mac_address },
-                            { $set: { calibration_mode: device.calibration_mode, calibrated_room: device.calibrated_room, pending_messages: device.pending_messages } }
+                            { $set: { calibration_mode: device.calibration_mode, calibrated_room: device.calibrated_room } }
                         );
                 console.log("Calibration mode set to: " + device.calibration_mode + " for device: " + device.mac_address + " in room: " + roomId);
             }
@@ -125,18 +116,9 @@ app.post("/calibration", async (req: Request, res: Response, next: NextFunction)
                 device.calibration_mode = false;
                 device.calibrated_room = undefined;
 
-                const message = "Online";
-                const newMessage = new PagerTask(PagerAction.DISPLAY, [
-                    message, // text
-                    0, // line
-                    2016, // text color
-                    0 // bg color
-                ]);
-                device.pending_messages.push(newMessage);
-
                 await collections.devices.updateOne(
                     { mac_address: device.mac_address },
-                    { $set: { calibration_mode: device.calibration_mode, calibrated_room: device.calibrated_room, pending_messages: device.pending_messages } }
+                    { $set: { calibration_mode: device.calibration_mode, calibrated_room: device.calibrated_room} }
                 );
                 let hasScanned = room.scan_results.length > 0;
 
@@ -257,7 +239,17 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
         else{
             pagerTasks.push(new PagerTask(PagerAction.DO_WHATEVER, []));
         }
+        let roomName = (await collections.rooms.findOne({ _id: device.location }) as Room).name;
+        let calibratingRoomName = device.calibrated_room ? (await collections.rooms.findOne({ _id: device.calibrated_room }) as Room).name : "";
 
+        let messageToDisplay = device.calibration_mode ? "[CAL]: " + calibratingRoomName : roomName;
+
+        pagerTasks.push(new PagerTask(PagerAction.DISPLAY, [
+            messageToDisplay, // text
+            0, // line (najwyższa ta)
+            64671, // text color (rozowy uwu)
+            0 // bg color (black)
+        ]));
         res.send(new ServerResponse(pagerTasks));
     } catch (error) {
         next(error);
