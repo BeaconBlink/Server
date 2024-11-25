@@ -239,7 +239,7 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
         else{
             pagerTasks.push(new PagerTask(PagerAction.DO_WHATEVER, []));
         }
-        let roomName = (await collections.rooms.findOne({ _id: device.location }) as Room).name;
+        let roomName = device.location ? (await collections.rooms.findOne({ _id: device.location }) as Room).name : "Online";
         let calibratingRoomName = device.calibrated_room ? (await collections.rooms.findOne({ _id: device.calibrated_room }) as Room).name : "";
 
         let messageToDisplay = device.calibration_mode ? "[CAL]: " + calibratingRoomName : roomName;
@@ -247,7 +247,7 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
         pagerTasks.push(new PagerTask(PagerAction.DISPLAY, [
             messageToDisplay, // text
             0, // line (najwyższa ta)
-            64671, // text color (rozowy uwu)
+            2016, // text color (rozowy uwu)
             0 // bg color (black)
         ]));
         res.send(new ServerResponse(pagerTasks));
