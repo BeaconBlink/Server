@@ -3,7 +3,9 @@ import { TbMessageCircle } from "react-icons/tb";
 import Select from "react-select";
 import Room from "../src/model/room";
 import Device from "../src/model/device";
+import { IoMdClose } from "react-icons/io";
 import MessageBox from "./components/MessageBox";
+import RoomsMap from "./components/RoomsMap";
 
 
 const HomePage: React.FC = () => {
@@ -123,14 +125,15 @@ const HomePage: React.FC = () => {
     };
 
     return (
-        <div className="main-theme min-h-screen w-screen flex pt-20 flex-col items-center">
-            <div className="md:w-4/5 w-11/12 rounded-md">
-                <div className="flex justify-between items-center p-4 w-full">
-                    <div>
-                        <h1 className="text-3xl font-bold text-accent-color2">Display rooms based on tag: </h1>
+        <div className="main-theme min-h-screen w-screen flex flex-col items-center">
+            <div className="md:w-5/6 min-h-screen w-11/12 pt-20 rounded-md flex flex-col">
+                <div className="flex h-1/6 justify-between content-center p-4 w-full">
+                    <div className="flex md:flex-row flex-col gap-2 w-4/5 md:w-full">
+                        <h1 className="text-2xl md:text-3xl font-bold text-accent-color2">Display rooms based on tag: </h1>
                         <Select
                             options={allTags}
                             styles={customStyles}
+                            className={"md:w-1/3 w-full"}
                             theme={customTheme}
                             onChange={(selected) => setTag(selected ? selected.value : "")}
                         />
@@ -139,14 +142,12 @@ const HomePage: React.FC = () => {
                         <TbMessageCircle size={24} className="text-accent-color"/>
                     </button>
                 </div>
-                <div className="flex flex-1">
-                    <div className="flex-1 p-4">
-                        {filteredRooms.map((room, index) => (
-                            <p>{room.name + ": " + getDevicesInRoom(room._id ? room._id.toString() : "" ).map((device) => device.alias || device.mac_address).join(", ")}</p>
-                        ), [])}
+                <div className="flex flex-col justify-between flex-1 h-auto">
+                    <div className="flex-1 p-4 md:h-auto h-full">
+                        <RoomsMap rooms={filteredRooms} devices={devices}/>
                     </div>
                     <div
-                        className={`flex-none w-full md:w-1/3 p-4 ${showMessages ? "block" : "hidden"} md:block`}>
+                        className={`flex-none h-1/4 w-full md:w-1/3 h-1/5 p-4 ${showMessages ? "block" : "hidden"} md:block`}>
                         <MessageBox devices={devices} rooms={rooms}/>
                     </div>
                 </div>
@@ -157,9 +158,9 @@ const HomePage: React.FC = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 md:hidden">
                     <div className="bg-main-color rounded-lg p-6 w-full h-full overflow-auto">
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl text-accent-color2 font-bold">Messages</h2>
-                            <button onClick={toggleMessages} className="text-red-500">
-                                Close
+                            <h2 className="text-xl text-accent-color2 font-bold">Send Message</h2>
+                            <button onClick={toggleMessages} className="bg-accent-color2 rounded-2xl p-2">
+                                <IoMdClose size={24} className="text-accent-color"></IoMdClose>
                             </button>
                         </div>
                         <div>

@@ -61,6 +61,10 @@
     background-color: var(--accent-color2);
 }
 
+.border-accent-color2{
+    border-color: var(--accent-color2);
+}
+
 .main-theme{
     background-color: var(--main-color);
     color: var(--accent-color);
