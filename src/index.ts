@@ -129,6 +129,20 @@ app.post("/calibration", async (req: Request, res: Response, next: NextFunction)
                     { $set: { last_calibration: room.last_calibration, calibrated: room.calibrated } }
                 );
 
+                try {
+                    const response = await fetch('http://mapping:8083/retrain', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error('Error informing model to retrain:', error);
+                }
+
                 console.log("Calibration mode set to: " + device.calibration_mode + " for device: " + device.mac_address + " in room: " + roomId);
             }
         }
@@ -208,7 +222,7 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
                 );
             }
         }
-        else if(locationMode){
+        else{
             try {
                 const response = await fetch('http://mapping:8083/location', {
                     method: 'POST',
@@ -218,11 +232,17 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
                     body: JSON.stringify({scan_results})
                 });
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    if (response.status === 503) {
+                        console.log('Model not trained yet, skipping location update.');
+                    } else {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
                 }
-                const data = await response.json();
-                let locationId = data.id;
-                collections.devices.updateOne({"mac_address": mac_address}, {$set: {"location": new ObjectId(locationId)}});
+                else {
+                    const data = await response.json();
+                    let locationId = data.id;
+                    collections.devices.updateOne({"mac_address": mac_address}, {$set: {"location": new ObjectId(locationId)}});
+                }
             } catch (error) {
                 console.error('Error fetching location:', error);
             }

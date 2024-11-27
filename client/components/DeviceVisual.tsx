@@ -23,7 +23,11 @@ const DeviceVisual: React.FC<DeviceVisualProps> = ({ device}) => {
                 }`}
             ></div>
             <p className="overflow-hidden whitespace-nowrap max-w-full cursor-help text-ellipsis text-sm md:text-base"
-               title={device.alias || device.mac_address}>
+               title={(device.alias ? device.alias + "\n" + device.mac_address : device.mac_address) + "\n\n"
+                + "Last connected: " + device.last_connected + "\n"
+                   + "Battery: " + device.battery_level + "%"
+
+            }>
                 {device.alias || device.mac_address}
             </p>
         </div>

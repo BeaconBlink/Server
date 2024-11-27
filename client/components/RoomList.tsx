@@ -12,8 +12,17 @@ const RoomList = () => {
     const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false);
     const [availableTags, setAvailableTags] = useState<string[]>([]);
     const [availableDevices, setAvailableDevices] = useState<Device[]>([]);
+    const [sortedRooms, setSortedRooms] = useState<Room[]>([]);
 
-
+    useEffect(() => {
+        const sorted = [...rooms].sort((a, b) => {
+            if (a.calibrated === b.calibrated) {
+                return a.name.localeCompare(b.name);
+            }
+            return a.calibrated ? -1 : 1;
+        });
+        setSortedRooms(sorted);
+    }, [rooms]);
 
     const onDeleteRoom = (room: Room) => {
         setRooms(rooms.filter((r) => r.name !== room.name));
@@ -98,7 +107,7 @@ const RoomList = () => {
                     </button>
                 )}
             </div>
-            {rooms.map((room, index) => (
+            {sortedRooms.map((room, index) => (
                 <RoomListElement key={index} room={room} onDelete={onDeleteRoom} availableTags={availableTags} setAvailableTags={setAvailableTags} availableDevices={availableDevices} setAvailableDevices={setAvailableDevices} />
             ))}
         </div>

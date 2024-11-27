@@ -112,6 +112,21 @@ roomsRouter.delete("/:id", async (req: Request, res: Response) => {
 
         if (result && result.deletedCount) {
             res.status(202).send(`Successfully removed room with id ${id}`);
+
+            try {
+                const response = await fetch('http://mapping:8083/retrain', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Error informing model to retrain:', error);
+            }
+
         } else if (!result) {
             res.status(400).send(`Failed to remove room with id ${id}`);
         } else if (!result.deletedCount) {
