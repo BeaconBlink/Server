@@ -73,3 +73,22 @@
 body {
     background-color: var(--main-color);
 }
+
+
+.room-visual-grid {
+    display: grid;
+}
+
+.rooms-map-grid {
+    display: grid;
+}
+
+@media (max-width: 768px) {
+    .room-visual-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .rooms-map-grid {
+        grid-template-columns: repeat(1, 1fr) !important;
+    }
+}
