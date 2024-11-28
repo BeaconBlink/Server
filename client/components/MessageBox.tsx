@@ -73,31 +73,31 @@ const MessageBox: React.FC<MessageBoxProps> = ({ devices, rooms, filteredRooms }
 
     // @ts-ignore
     return (
-        <div className="h-full p-4 flex flex-col justify-between">
-            <div className="overflow-y-scroll">
-            {filteredRooms.map(room => (
-                <div key={room._id?.toString()} className="mb-4">
-                    <h3 className="font-bold text-lg mb-2 text-accent-color2">{room.name}</h3>
-                    <ul className="list-inside">
-                        {devices
-                            .filter(device => room._id && device.location && device.location.toString() === room._id.toString())
-                            .map(device => (
-                                <li className="ml-4 my-2" key={device.mac_address}>
-                                    {device.alias || device.mac_address}
-                                </li>
-                            ))}
-                    </ul>
-                </div>
-            ))}
+        <div className="h-full p-4 flex flex-col">
+            <div className="flex-1 overflow-y-auto mb-4">
+                {filteredRooms.map(room => (
+                    <div key={room._id?.toString()} className="mb-4">
+                        <h3 className="font-bold text-lg mb-2 text-accent-color2">{room.name}</h3>
+                        <ul className="list-inside">
+                            {devices
+                                .filter(device => room._id && device.location && device.location.toString() === room._id.toString())
+                                .map(device => (
+                                    <li className="ml-4 my-2" key={device.mac_address}>
+                                        {device.alias || device.mac_address}
+                                    </li>
+                                ))}
+                        </ul>
+                    </div>
+                ))}
             </div>
-            <div className="h-1/12 w-full flex flex-col">
-                <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Type your message"
-                    className="w-full p-2 mb-4 border rounded bg-main-color text-accent-color"
-                />
-                <div className="flex h-1/3 justify-evenly items-center">
+            <div className="h-auto w-full flex flex-col">
+            <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Type your message"
+                className="w-full p-2 mb-4 border rounded bg-main-color text-accent-color"
+            />
+                <div className="flex h-auto mb-8 md:mb-0 justify-evenly items-center">
                     <Select
                         options={groupedOptions}
                         onChange={(selectedOption) => setSelectedDevices(selectedOption ? (selectedOption as any).map((option: any) => option.value) : [])}

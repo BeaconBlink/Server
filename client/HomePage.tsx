@@ -125,47 +125,48 @@ const HomePage: React.FC = () => {
     };
 
     return (
-        <div className="main-theme h-screen w-screen flex flex-col items-center">
-            <div className="h-full pt-20 w-11/12 rounded-md flex flex-col">
-                <div className="flex h-1/6 justify-between content-center p-4 w-full">
-                    <div className="flex md:flex-row flex-col gap-2 w-4/5 md:w-full">
-                        <h1 className="text-2xl md:text-3xl font-bold text-accent-color2">Display rooms based on tag: </h1>
+        <div className="main-theme h-screen w-screen flex flex-col items-center overflow-hidden">
+            <div className="h-full pt-20 w-11/12 rounded-md flex flex-col overflow-hidden">
+                <div className="flex flex-col md:flex-row h-auto md:h-[10%] justify-between content-center p-4 w-full gap-4 md:gap-0">
+                    <div className="flex flex-col md:flex-row gap-2 w-full">
+                        <h1 className="text-2xl md:text-3xl font-bold text-accent-color2 mb-2 md:mb-0">
+                            Display rooms based on tag:
+                        </h1>
                         <Select
                             options={allTags}
                             styles={customStyles}
-                            className={"md:w-1/3 w-full"}
+                            className={"w-full md:w-1/3"}
                             theme={customTheme}
                             onChange={(selected) => setTag(selected ? selected.value : "")}
                         />
                     </div>
-                    <button onClick={toggleMessages} className="bg-accent-color2 text-accent-color block md:hidden px-4 py-2 rounded">
+                    <button
+                        onClick={toggleMessages}
+                        className="bg-accent-color2 text-accent-color block md:hidden px-4 py-2 rounded self-end"
+                    >
                         <TbMessageCircle size={24} className="text-accent-color"/>
                     </button>
                 </div>
-                <div className="flex justify-between flex-1 h-full">
-                    <div className="flex-1 p-4 md:h-auto h-full overflow-y-scroll">
+                <div className="flex flex-col md:flex-row justify-between flex-1 overflow-hidden">
+                    <div className="flex-1 p-4 overflow-y-auto">
                         <RoomsMap rooms={filteredRooms} devices={devices}/>
                     </div>
-                    <div
-                        className={`flex-none w-1/4 p-4 hidden md:block`}>
+                    <div className={`flex-none w-full md:w-1/4 p-4 hidden md:block`}>
                         <MessageBox devices={devices} rooms={rooms} filteredRooms={filteredRooms}/>
                     </div>
                 </div>
             </div>
 
-
             {showMessages && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center w-screen h-screen z-50 md:hidden">
-                    <div className="bg-main-color rounded-lg p-6 w-full h-full overflow-auto">
+                    <div className="bg-main-color rounded-lg p-6 w-full h-full overflow-hidden">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl text-accent-color2 font-bold">Send Message</h2>
                             <button onClick={toggleMessages} className="bg-accent-color2 rounded-2xl p-2">
                                 <IoMdClose size={24} className="text-accent-color"></IoMdClose>
                             </button>
                         </div>
-                        <div>
-                            <MessageBox devices={devices} rooms={rooms} filteredRooms={filteredRooms}/>
-                        </div>
+                        <MessageBox devices={devices} rooms={rooms} filteredRooms={filteredRooms}/>
                     </div>
                 </div>
             )}

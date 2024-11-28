@@ -13,11 +13,14 @@ interface RoomsMapProps {
 const RoomsMap: React.FC<RoomsMapProps> = ({ devices, rooms }) => {
 
     return (
-        <div className="flex flex-wrap justify-center items-center h-full w-full gap-8">
-            {rooms.map((room) => {
-                return (
-                    <RoomVisual room={room} devices={devices.filter((d) => d.location && room._id && d.location.toString() === room._id.toString())}/>
-                    )})}
+        <div className="flex flex-wrap justify-center items-start h-full w-full gap-8 overflow-y-auto">
+            {rooms.map((room) => (
+                <RoomVisual
+                    key={room._id?.toString()}
+                    room={room}
+                    devices={devices.filter((d) => d.location && room._id && d.location.toString() === room._id.toString())}
+                />
+            ))}
         </div>
     );
 };
