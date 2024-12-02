@@ -28,8 +28,6 @@ initDbConnection().then(() => {
 app.use("/devices", devicesRouter);
 app.use("/rooms", roomsRouter);
 
-let locationMode: boolean = false;
-
 app.get("/", (req: Request, res: Response, next: NextFunction): void => {
     try {
         res.send("index.html");
@@ -147,38 +145,6 @@ app.post("/calibration", async (req: Request, res: Response, next: NextFunction)
             }
         }
         res.send("Calibration mode set to: " + devices);
-    } catch (error) {
-        next(error);
-    }
-});
-
-app.post("/location", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        let flag: boolean = req.body.locationMode;
-        // if(locationMode){
-        //     res.send("Location mode already set to: " + flag);
-        //     return;
-        // }
-        try {
-            const response = await fetch('http://mapping:8083/location/mode', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({mode: flag}), // send flag in request body
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            if(data.trained){
-                locationMode = true;
-                console.log("Location mode set to: " + flag);
-                res.send("Location mode set to: " + flag);
-            }
-        } catch (error) {
-            console.error('Error setting location mode:', error);
-        }
     } catch (error) {
         next(error);
     }
