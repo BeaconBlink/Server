@@ -222,9 +222,6 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
                 { $set: { pending_messages: device.pending_messages } }
             );
         }
-        else{
-            pagerTasks.push(new PagerTask(PagerAction.DO_WHATEVER, []));
-        }
         let roomName = device.location ? (await collections.rooms.findOne({ _id: device.location }) as Room).name : "Online";
         let calibratingRoomName = device.calibrated_room ? (await collections.rooms.findOne({ _id: device.calibrated_room }) as Room).name : "";
 

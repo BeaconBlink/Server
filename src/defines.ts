@@ -22,7 +22,6 @@ export class PagerPing {
 }
 
 export enum PagerAction {
-    DO_WHATEVER= "whatever",
     DISPLAY = "display"
 }
 
