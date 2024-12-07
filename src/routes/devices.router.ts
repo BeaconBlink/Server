@@ -91,11 +91,11 @@ devicesRouter.put("/:mac_address", async (req: Request, res: Response) => {
     const mac_address = req?.params?.mac_address;
 
     try {
-        const updateDevice: Device = req.body as Device;
+        const updatedDevice: Device = req.body as Device;
         const query = { mac_address: mac_address };
 
         // @ts-ignore
-        const result = await collections.devices.updateOne(query, { $set: updateDevice });
+        const result = await collections.devices.updateOne(query, { $set: updatedDevice });
 
         result
             ? res.status(200).send(`Successfully updated device with mac_address ${mac_address}`)
