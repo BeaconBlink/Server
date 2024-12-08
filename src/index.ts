@@ -224,11 +224,20 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
                 { $set: { pending_messages: device.pending_messages } }
             );
         }
-        let roomName = device.location ? (await collections.rooms.findOne({ _id: device.location }) as Room).name : "Online";
-        let calibratingRoomName = device.calibrated_room ? (await collections.rooms.findOne({ _id: device.calibrated_room }) as Room).name : "";
-
-        let messageToDisplay = device.calibration_mode ? "[CAL]: " + calibratingRoomName : roomName;
-
+        let messageToDisplay = "Online"
+        if (device.location){
+            let foundRoom = await collections.rooms.findOne({ _id: device.location }) as Room
+            if(foundRoom){
+                messageToDisplay = foundRoom.name;
+            }
+        }
+        if(device.calibration_mode && device.calibration_mode){
+            let calibratingRoom = await collections.rooms.findOne({ _id: device.calibrated_room }) as Room;
+            if(calibratingRoom){
+                messageToDisplay = "[CAL]: " + calibratingRoom.name;
+            }
+        }
+        
         pagerTasks.push(new PagerTask(PagerAction.DISPLAY, [
             messageToDisplay, // text
             0, // line (najwyższa ta)
