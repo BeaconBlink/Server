@@ -219,6 +219,11 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
         let pagerTasks: PagerTask[] = [];
         if(device.pending_messages.length > 0){
             pagerTasks.push(device.pending_messages.shift() as PagerTask);
+            pagerTasks.push(new PagerTask(PagerAction.BUZZER,
+                [
+                    3, //ile razy
+                    200 //ile ms trwa każde piknięcie
+                ]))
             await collections.devices.updateOne(
                 { mac_address: mac_address },
                 { $set: { pending_messages: device.pending_messages } }

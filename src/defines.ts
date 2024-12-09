@@ -34,7 +34,8 @@ export class PagerPing {
 }
 
 export enum PagerAction {
-    DISPLAY = "display"
+    DISPLAY = "display",
+    BUZZER = "buzz"
 }
 
 export class PagerTask {
