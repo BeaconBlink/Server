@@ -1,6 +1,6 @@
 import express, {NextFunction, Request, Response} from "express";
 import path from "path";
-import {BatteryInfo, NetworkInfo, PagerAction, PagerTask, ServerResponse} from './defines';
+import {NetworkInfo, PagerAction, PagerTask, ServerResponse} from './defines';
 import {collections, connect} from "./services/database.service";
 import {devicesRouter} from "./routes/devices.router";
 import {roomsRouter} from "./routes/rooms.router";
@@ -158,20 +158,18 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
 
         if(collections.devices == undefined || collections.rooms == undefined) throw new Error("Database not connected");
         let device = await collections.devices.findOne({ mac_address: mac_address }) as Device;
-        const batteryInfo = new BatteryInfo(battery_voltage, new Date());
         if (device) {
             // Update the last_connected time
             device.last_connected = new Date();
-            device.battery_infos.push(batteryInfo);
             await collections.devices.updateOne(
                 { mac_address: mac_address },
-                { $set: { last_connected: device.last_connected, battery_infos: device.battery_infos } }
+                { $set: { last_connected: device.last_connected} }
             );
             console.log(`Updated last_connected time for device with mac_address ${mac_address}`);
 
         } else {
 
-            const newDevice = new Device(mac_address, "", new Date(), false, 100, [], [batteryInfo]);
+            const newDevice = new Device(mac_address, "", new Date(), false, 100, []);
             await collections.devices.insertOne(newDevice);
             console.log(`Successfully created a new device with mac_address ${mac_address}`);
             device = newDevice;

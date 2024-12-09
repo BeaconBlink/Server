@@ -1,5 +1,5 @@
 import {ObjectId} from "mongodb";
-import {BatteryInfo, PagerTask} from "../defines";
+import {PagerTask} from "../defines";
 
 export default class Device {
     constructor(public mac_address: string,
@@ -8,7 +8,6 @@ export default class Device {
     public calibration_mode: boolean,
     public battery_level: number,
     public pending_messages: PagerTask[],
-    public battery_infos: BatteryInfo[],
     public calibrated_room?: ObjectId,
     public location?: ObjectId,
     public _id?: ObjectId) {}
