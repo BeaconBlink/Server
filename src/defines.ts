@@ -11,16 +11,6 @@ export class NetworkInfo {
     }
 }
 
-export class BatteryInfo {
-    battery_voltage: number;
-    measure_time: Date;
-
-    constructor(battery_voltage: number, measure_time: Date) {
-        this.battery_voltage = battery_voltage;
-        this.measure_time = measure_time;
-    }
-}
-
 export class PagerPing {
     mac_address: string;
     battery_voltage: number;
