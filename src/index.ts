@@ -154,16 +154,17 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
     try {
         let mac_address: string = req.body.mac_address;
         let scan_results: NetworkInfo[] = req.body.scan_results;
-        let battery_voltage: number = req.body.battery_voltage;
+        let battery_level: number = req.body.battery_level;
 
         if(collections.devices == undefined || collections.rooms == undefined) throw new Error("Database not connected");
         let device = await collections.devices.findOne({ mac_address: mac_address }) as Device;
         if (device) {
             // Update the last_connected time
             device.last_connected = new Date();
+            device.battery_level = battery_level;
             await collections.devices.updateOne(
                 { mac_address: mac_address },
-                { $set: { last_connected: device.last_connected} }
+                { $set: { last_connected: device.last_connected, battery_level: device.battery_level} }
             );
             console.log(`Updated last_connected time for device with mac_address ${mac_address}`);
 
@@ -240,7 +241,14 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
                 messageToDisplay = "[CAL]: " + calibratingRoom.name;
             }
         }
-        
+
+        pagerTasks.push(new PagerTask(PagerAction.DISPLAY, [
+            device.battery_level + "%",
+            1,
+            device.battery_level > 20 ? 2016 : 63488,
+            0
+        ]));
+
         pagerTasks.push(new PagerTask(PagerAction.DISPLAY, [
             messageToDisplay, // text
             0, // line (najwyższa ta)
