@@ -154,7 +154,7 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
     try {
         let mac_address: string = req.body.mac_address;
         let scan_results: NetworkInfo[] = req.body.scan_results;
-        let battery_level: number = req.body.battery_level;
+        let battery_level: number = req.body.battery_percentage;
 
         if(collections.devices == undefined || collections.rooms == undefined) throw new Error("Database not connected");
         let device = await collections.devices.findOne({ mac_address: mac_address }) as Device;
@@ -170,7 +170,7 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
 
         } else {
 
-            const newDevice = new Device(mac_address, "", new Date(), false, 100, []);
+            const newDevice = new Device(mac_address, "", new Date(), false, battery_level, []);
             await collections.devices.insertOne(newDevice);
             console.log(`Successfully created a new device with mac_address ${mac_address}`);
             device = newDevice;
@@ -241,13 +241,6 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
                 messageToDisplay = "[CAL]: " + calibratingRoom.name;
             }
         }
-
-        pagerTasks.push(new PagerTask(PagerAction.DISPLAY, [
-            device.battery_level + "%",
-            1,
-            device.battery_level > 20 ? 2016 : 63488,
-            0
-        ]));
 
         pagerTasks.push(new PagerTask(PagerAction.DISPLAY, [
             messageToDisplay, // text
