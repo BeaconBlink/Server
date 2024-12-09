@@ -248,7 +248,11 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
             2016, // text color (rozowy uwu)
             0 // bg color (black)
         ]));
-        res.send(new ServerResponse(pagerTasks));
+
+        const date = new Date();
+        let serverTime = Math.round(date.getTime() / 1000 - date.getTimezoneOffset() * 60);
+
+        res.send(new ServerResponse(pagerTasks, serverTime));
     } catch (error) {
         next(error);
     }
