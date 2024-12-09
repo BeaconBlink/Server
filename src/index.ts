@@ -154,16 +154,16 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
     try {
         let mac_address: string = req.body.mac_address;
         let scan_results: NetworkInfo[] = req.body.scan_results;
+        let battery_voltage: number = req.body.battery_voltage;
 
         if(collections.devices == undefined || collections.rooms == undefined) throw new Error("Database not connected");
         let device = await collections.devices.findOne({ mac_address: mac_address }) as Device;
-
         if (device) {
             // Update the last_connected time
             device.last_connected = new Date();
             await collections.devices.updateOne(
                 { mac_address: mac_address },
-                { $set: { last_connected: device.last_connected } }
+                { $set: { last_connected: device.last_connected} }
             );
             console.log(`Updated last_connected time for device with mac_address ${mac_address}`);
 
@@ -217,16 +217,30 @@ app.post("/ping", async (req: Request, res: Response, next: NextFunction): Promi
         let pagerTasks: PagerTask[] = [];
         if(device.pending_messages.length > 0){
             pagerTasks.push(device.pending_messages.shift() as PagerTask);
+            pagerTasks.push(new PagerTask(PagerAction.BUZZER,
+                [
+                    3, //ile razy
+                    200 //ile ms trwa każde piknięcie
+                ]))
             await collections.devices.updateOne(
                 { mac_address: mac_address },
                 { $set: { pending_messages: device.pending_messages } }
             );
         }
-        let roomName = device.location ? (await collections.rooms.findOne({ _id: device.location }) as Room).name : "Online";
-        let calibratingRoomName = device.calibrated_room ? (await collections.rooms.findOne({ _id: device.calibrated_room }) as Room).name : "";
-
-        let messageToDisplay = device.calibration_mode ? "[CAL]: " + calibratingRoomName : roomName;
-
+        let messageToDisplay = "Online"
+        if (device.location){
+            let foundRoom = await collections.rooms.findOne({ _id: device.location }) as Room
+            if(foundRoom){
+                messageToDisplay = foundRoom.name;
+            }
+        }
+        if(device.calibration_mode && device.calibration_mode){
+            let calibratingRoom = await collections.rooms.findOne({ _id: device.calibrated_room }) as Room;
+            if(calibratingRoom){
+                messageToDisplay = "[CAL]: " + calibratingRoom.name;
+            }
+        }
+        
         pagerTasks.push(new PagerTask(PagerAction.DISPLAY, [
             messageToDisplay, // text
             0, // line (najwyższa ta)

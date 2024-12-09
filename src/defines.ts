@@ -11,18 +11,31 @@ export class NetworkInfo {
     }
 }
 
+export class BatteryInfo {
+    battery_voltage: number;
+    measure_time: Date;
+
+    constructor(battery_voltage: number, measure_time: Date) {
+        this.battery_voltage = battery_voltage;
+        this.measure_time = measure_time;
+    }
+}
+
 export class PagerPing {
     mac_address: string;
+    battery_voltage: number;
     scan_results: NetworkInfo[];
 
-    constructor(mac_address: string, scan_results: NetworkInfo[]) {
+    constructor(mac_address: string, scan_results: NetworkInfo[], battery_voltage: number) {
         this.mac_address = mac_address;
         this.scan_results = scan_results;
+        this.battery_voltage = battery_voltage;
     }
 }
 
 export enum PagerAction {
-    DISPLAY = "display"
+    DISPLAY = "display",
+    BUZZER = "buzz"
 }
 
 export class PagerTask {
