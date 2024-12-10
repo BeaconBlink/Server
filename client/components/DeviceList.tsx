@@ -54,7 +54,16 @@ const DeviceList = () => {
     };
 
     const sortedDevices = devices.sort((a, b) => {
-        return new Date(b.last_connected).getTime() - new Date(a.last_connected).getTime();
+        const isActiveA = isActive(new Date(a.last_connected));
+        const isActiveB = isActive(new Date(b.last_connected));
+
+        if (isActiveA && !isActiveB) return -1;
+        if (!isActiveA && isActiveB) return 1;
+
+        const aliasA = a.alias || a.mac_address;
+        const aliasB = b.alias || b.mac_address;
+
+        return aliasA.localeCompare(aliasB);
     });
 
     return (
