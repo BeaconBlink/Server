@@ -10,12 +10,13 @@ import RoomsMap from "./components/RoomsMap";
 
 const HomePage: React.FC = () => {
     const [showMessages, setShowMessages] = useState(false);
-    const [tag, setTag] = useState<string>("");
+    const [selectedTag, setSelectedTag] = useState<string>("");
     const [allTags, setAllTags] = useState<{ label: string, value: string }[]>([]);
     const [rooms, setRooms] = useState<Room[]>([]);
     const [filteredRooms, setFilteredRooms] = useState<Room[]>([]);
     const [devices, setDevices] = useState<Device[]>([]);
     const [deviceLocations, setDeviceLocations] = useState<{ [key: string]: string }>({});
+    const [hasCalibratedRooms, setHasCalibratedRooms] = useState(false);
 
     const DATA_REFRESH_RATE = 5*1000;
 
@@ -46,6 +47,8 @@ const HomePage: React.FC = () => {
             const data = await response.json();
             setDevices(data);
             await fetchDeviceLocations(data);
+
+            const calibratingDevices = data.some((device: Device) => device.calibration_mode);
         };
 
         fetchData().catch((error) => {
@@ -68,6 +71,9 @@ const HomePage: React.FC = () => {
         const response = await fetch("/rooms");
         const data = await response.json();
         setRooms(data);
+
+        const calibratedRooms = data.some((room: Room) => room.calibrated);
+        setHasCalibratedRooms(calibratedRooms);
     };
 
     useEffect(() => {
@@ -82,12 +88,12 @@ const HomePage: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (tag === "") {
-            setFilteredRooms(rooms);
+        if (selectedTag === "") {
+            setFilteredRooms(rooms.filter((room) => room.calibrated));
         } else {
-            setFilteredRooms(rooms.filter((room) => room.tags.includes(tag)));
+            setFilteredRooms(rooms.filter((room) => room.tags.includes(selectedTag) && room.calibrated));
         }
-    }, [tag]);
+    }, [selectedTag]);
 
     const toggleMessages = () => {
         setShowMessages(!showMessages);
@@ -137,7 +143,7 @@ const HomePage: React.FC = () => {
                             styles={customStyles}
                             className={"w-full md:w-1/3"}
                             theme={customTheme}
-                            onChange={(selected) => setTag(selected ? selected.value : "")}
+                            onChange={(selected) => setSelectedTag(selected ? selected.value : "")}
                         />
                     </div>
                     <button
@@ -149,7 +155,21 @@ const HomePage: React.FC = () => {
                 </div>
                 <div className="flex flex-col md:flex-row justify-between flex-1 overflow-hidden">
                     <div className="flex-1 p-4 overflow-y-auto">
-                        <RoomsMap rooms={filteredRooms} devices={devices}/>
+                        {!hasCalibratedRooms ? (
+                            <div className="text-center text-2xl text-accent-color2 mt-20">
+                                <h1>No calibrated rooms available. Make sure to add and calibrate rooms first.</h1>
+                            </div>
+                        ) : selectedTag === "" ? (
+                            <div className="text-center text-accent-color2 mt-20">
+                                <h1>Please select a tag to display rooms.</h1>
+                            </div>
+                        ) : filteredRooms.length === 0 ? (
+                            <div className="text-center text-accent-color2 mt-20">
+                                <h1>No calibrated rooms available. Make sure to add and calibrate rooms first.</h1>
+                            </div>
+                        ) : (
+                            <RoomsMap rooms={filteredRooms} devices={devices}/>
+                        )}
                     </div>
                     <div className={`flex-none w-full md:w-1/4 p-4 hidden md:block`}>
                         <MessageBox devices={devices} rooms={rooms} filteredRooms={filteredRooms}/>
