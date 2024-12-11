@@ -2,3 +2,4 @@
 /dist
 docker-compose.yml
 /.idea
+.tool-versions
