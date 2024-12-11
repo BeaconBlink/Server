@@ -40,10 +40,8 @@ export class PagerTask {
 
 export class ServerResponse {
     tasks: PagerTask[];
-    serverTime: number;
 
-    constructor(tasks: PagerTask[], serverTime: number) {
+    constructor(tasks: PagerTask[]) {
         this.tasks = tasks;
-        this.serverTime = serverTime;
     }
 }
