@@ -160,11 +160,11 @@ const HomePage: React.FC = () => {
                                 <h1>No calibrated rooms available. Make sure to add and calibrate rooms first.</h1>
                             </div>
                         ) : selectedTag === "" ? (
-                            <div className="text-center text-accent-color2 mt-20">
+                            <div className="text-center text-2xl text-accent-color2 mt-20">
                                 <h1>Please select a tag to display rooms.</h1>
                             </div>
                         ) : filteredRooms.length === 0 ? (
-                            <div className="text-center text-accent-color2 mt-20">
+                            <div className="text-center text-2xl text-accent-color2 mt-20">
                                 <h1>No calibrated rooms available. Make sure to add and calibrate rooms first.</h1>
                             </div>
                         ) : (
