@@ -40,7 +40,16 @@ const MessageBox: React.FC<MessageBoxProps> = ({ devices, rooms, filteredRooms }
                 value: device.mac_address
             }))
     }));
-
+    groupedOptions.push({
+        label: 'No Room',
+        options: devices
+            .filter(device => !device.location)
+            .filter(device => !selectedDevices.includes(device.mac_address))
+            .map(device => ({
+                label: device.alias || device.mac_address,
+                value: device.mac_address
+            }))
+    })
     const customTheme = (theme: any) => ({
         ...theme,
         colors: {
