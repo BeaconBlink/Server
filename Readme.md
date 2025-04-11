@@ -44,8 +44,6 @@ Then start the server:
   npm run start
 ```
 
-# Server Endpoints
-
 ## Available Endpoints
 
 ### `GET "/"`
